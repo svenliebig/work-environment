@@ -8,7 +8,19 @@ work environment is a CLI tool to help you to simplify your daily workflow by:
 
 ## Installing
 
+The current install is only available by build this project yourself.
+
+Requirements:
+
+* go >= 1.18
+
+### Unix Systems
+
 ```sh
+git clone git@github.com:svenliebig/work-environment.git
+cd work-environment
+./build.sh
+echo 'export PATH="$PATH:$(pwd)/bin"' >> ~/.bash_profile
 ```
 
 ## Set up your environment
@@ -74,7 +86,7 @@ Example:
 we ci add --name 'company-ci' --projectKey 'PRO-JECT' --project "my-project"
 ```
 
-### `open`
+### `we ci open`
 
 Open's the related CI of the project in your browser. If branch builds are supported by that CI, it will be opened on
 the latest or running branch build.
