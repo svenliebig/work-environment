@@ -37,7 +37,44 @@ located in a specific project, the command will be execute on that project. If y
 projects, the CLI will provide either ask you to select one of the projects, or execute the command on all project when you
 provided the `--all` flag.
 
-### Open CI
+### CI (`we ci`)
+
+Commands that will help you to manage the continuous integration.
+
+#### `we ci create`
+
+This command will `create` a global CI to your work environment.
+
+Parameters:
+
+* `name` - the identifier for the CI, this must be unique over the whole work-environment
+* `type` - the CI type, can be `bamboo`
+* `auth` - the basic auth token (base64 encoded)
+* `url`  - the root url of your CI
+
+Example:
+
+```sh
+we ci create --name 'company-ci' --type 'bamboo' --auth 'jfgasdijaskosdf*13asdka)1231' --url 'https://bamboo.mycompany.com'
+```
+
+#### `we ci add`
+
+This command will `add` an CI environment to your project. It need to be executed in a directory of a project or you need to provide the project identifier.
+
+Parameters:
+
+* `project` - the project identifier in your work-environment. __optional__ if you are in the directory of the project.
+* `name` - the identifier for the CI. __optional__ when there is only one CI setup in your project.
+* `projectKey` - the project key on you CI
+
+Example:
+
+```sh
+we ci add --name 'company-ci' --projectKey 'PRO-JECT' --project "my-project"
+```
+
+### `open`
 
 Open's the related CI of the project in your browser. If branch builds are supported by that CI, it will be opened on
 the latest or running branch build.
