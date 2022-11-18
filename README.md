@@ -23,22 +23,17 @@ cd work-environment
 echo 'export PATH="$PATH:$(pwd)/bin"' >> ~/.bash_profile
 ```
 
+Thoughts, there would be the possibility to have multiple work-environment. Does this make sense? Or do we want a global bash variable that defines that localtion of that work environment.
+
 ## Set up your environment
 
-You can easily initialize your instance by navigating to your default workspace (the root of the place where all your
-repositories and projects are) and executing this command:
+You can easily initialize your instance by navigating to your default workspace (the root of the place where all your repositories and projects are) and executing this command:
 
 ```sh
 we init
 ```
 
-Errors:
-
-* there is already a work environment file
-
-Thoughts: `do` needs to be renamed, it's reserved basically everywhere. Also important is the position of the keys, you 
-will not have fun pressing `qp` all the time. `cd` is a good example, you can enter it by just rolling with two fingers
-over your keyboard. `df`
+If there is already a `.work-environment` directory and configuration, the command will ask you if you want to override the existing configuration or not.
 
 This will search for project's in the directories and create the foundation for your environment.
 
@@ -78,7 +73,8 @@ Parameters:
 
 * `project` - the project identifier in your work-environment. __optional__ if you are in the directory of the project.
 * `name` - the identifier for the CI. __optional__ when there is only one CI setup in your project.
-* `projectKey` - the project key on you CI
+* `projectKey` - the project key on you CI, __optional__ if suggest is used
+* `suggest (optional: boolean)` - try to use the CI api to find you project build
 
 Example:
 
@@ -88,8 +84,7 @@ we ci add --name 'company-ci' --projectKey 'PRO-JECT' --project "my-project"
 
 ### `we ci open`
 
-Open's the related CI of the project in your browser. If branch builds are supported by that CI, it will be opened on
-the latest or running branch build.
+Open's the related CI of the project in your browser. If branch builds are supported by that CI, it will be opened on the latest or running branch build.
 
 ```sh
 we open ci

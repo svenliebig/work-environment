@@ -1,0 +1,25 @@
+{
+    "create-use-get": {
+        "scope": "go",
+        "prefix": "cug",
+        "body": [
+            "export function useGet$1($2: $3, options: GetQueryOptions<$4>[\"options\"] = {}) {",
+            "    return useGetQuery([$5], {",
+            "        url: `${$6}`,",
+            "        options,",
+            "    })",
+            "}"
+        ]
+    },
+    "create-use-get-mock": {
+        "scope": "typescript",
+        "prefix": "cugm",
+        "body": [
+            "export function mockGet$1($2: $3, data: $4) {",
+            "    return rest.get(`/api/v1/$5`, (_, res, ctx) => {",
+            "        return res(ctx.json(data))",
+            "    })",
+            "}"
+        ]
+    }
+}
