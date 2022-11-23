@@ -16,7 +16,7 @@ type Client struct {
 	AuthToken string
 }
 
-func (c *Client) Get(ctx context.Context, path string, o *rest.Options) (*http.Response, error) {
+func (c *Client) get(ctx context.Context, path string, o *rest.Options) (*http.Response, error) {
 	url := fmt.Sprintf("%s/rest/api/latest%s", c.BaseUrl, path)
 	o.Headers["Authorization"] = fmt.Sprintf("Basic %s", c.AuthToken)
 	return rest.Get(ctx, url, o)

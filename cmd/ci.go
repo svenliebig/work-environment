@@ -120,8 +120,10 @@ work environment.`,
 	}
 	openCmd = &cobra.Command{
 		Use:   "open",
-		Short: "Opens the CI environment in your default browser",
-		Long:  `Opens the CI environment in your default browser`,
+		Short: "Opens the CI environment of you current project path in the browser",
+		Long: `Opens the CI environment of you current project path in the browser
+the project path is your current working directory, the project needs to
+have a CI configured.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			p, err := utils.GetPath([]string{})
 
@@ -136,6 +138,24 @@ work environment.`,
 			}
 		},
 	}
+	listCmd = &cobra.Command{
+		Use:   "list",
+		Short: "Lists the available CI environments in your work environment",
+		Long:  `Lists the available CI environments in your work environment`,
+		Run: func(cmd *cobra.Command, args []string) {
+			p, err := utils.GetPath([]string{})
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = ci.List(p)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
 )
 
 func init() {
@@ -143,6 +163,7 @@ func init() {
 	ciCmd.AddCommand(createCmd)
 	ciCmd.AddCommand(addCmd)
 	ciCmd.AddCommand(openCmd)
+	ciCmd.AddCommand(listCmd)
 
 	createCmd.Flags().StringP("url", "u", "", "the URL of the CI you want to add\nexample: 'https://bamboo.company.com'")
 	createCmd.Flags().StringP("type", "t", "", "the CI type, currently available types are 'bamboo'\nexample: 'bamboo'")

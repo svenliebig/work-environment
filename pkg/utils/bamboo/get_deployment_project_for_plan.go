@@ -10,22 +10,16 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/rest"
 )
 
-type BranchesSearchResult struct {
-	Size          int `json:"size"`
-	SearchResults []struct {
-		Id           string `json:"id"`
-		SearchEntity struct {
-			Key        string `json:"key"`
-			BranchName string `json:"branchName"`
-		} `json:"searchEntity"`
-	} `json:"searchResults"`
+type DeploymentProjectForPlanResult struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
-func (c *Client) SearchBranches(planKey string, searchTerm string) (*BranchesSearchResult, error) {
+func (c *Client) GetDeploymentProjectForPlan(planKey string) ([]*DeploymentProjectForPlanResult, error) {
 	headers := make(map[string]string)
 	headers["Accept"] = "application/json"
 
-	res, err := c.get(context.TODO(), fmt.Sprintf("/search/branches?masterPlanKey=%s&searchTerm=%s", planKey, searchTerm), &rest.Options{
+	res, err := c.get(context.TODO(), fmt.Sprintf("/deploy/project/forPlan?planKey=%s", planKey), &rest.Options{
 		Headers: headers,
 	})
 
@@ -47,11 +41,11 @@ func (c *Client) SearchBranches(planKey string, searchTerm string) (*BranchesSea
 		return nil, errors.New(string(body))
 	}
 
-	var result BranchesSearchResult
+	var result []*DeploymentProjectForPlanResult
 
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
 	}
 
-	return &result, nil
+	return result, nil
 }

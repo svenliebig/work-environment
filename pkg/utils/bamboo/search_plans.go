@@ -25,7 +25,7 @@ func (c *Client) SearchPlans(searchTerm string) (*PlansSearchResult, error) {
 	headers := make(map[string]string)
 	headers["Accept"] = "application/json"
 
-	res, err := c.Get(context.TODO(), fmt.Sprintf("/search/plans?searchTerm=%s", searchTerm), &rest.Options{
+	res, err := c.get(context.TODO(), fmt.Sprintf("/search/plans?searchTerm=%s", searchTerm), &rest.Options{
 		Headers: headers,
 	})
 

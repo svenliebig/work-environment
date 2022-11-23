@@ -14,18 +14,14 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "we",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "the work environment cli help you to organize and maintain a productive work environment",
+	Long: `the work environment cli help you to organize and maintain a productive work environment
+by providing a link between the tool you use the most (the cli) and the applications
+that you have to use (like CI, CD, Dev/QA Stages, etc).
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run root cmd")
-	},
+The goal is, to get less disrupted in your workflow and more time for important 
+things, rather than waiting for lists of ci plans to fetch or waiting for bloated
+web applications (*cough cough* jira *cough*) to execute a base functionality.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -33,18 +29,10 @@ to quickly create a Cobra application.`,
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.work-environment.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
