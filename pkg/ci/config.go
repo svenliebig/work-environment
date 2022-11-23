@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/svenliebig/work-environment/pkg/utils/bamboo"
 	"github.com/svenliebig/work-environment/pkg/utils/wepath"
 )
 
@@ -31,6 +32,16 @@ func (C *CIConfig) Contains(identifier string) bool {
 		}
 	}
 	return false
+}
+
+func (c *CI) GetClient() (*bamboo.Client, error) {
+	if c.CiType == "bamboo" {
+		return &bamboo.Client{
+			BaseUrl:   c.Url,
+			AuthToken: c.AuthToken,
+		}, nil
+	}
+	return nil, fmt.Errorf("ci type %q not supported", c.CiType)
 }
 
 // returns the environment directly if there is only one ci environment
