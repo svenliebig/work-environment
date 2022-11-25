@@ -36,7 +36,12 @@ config directory will be created.`,
 			Override: cmd.Flag("override").Value.String() == "true",
 		}
 
-		initialize.Do(p, o)
+		err = initialize.Do(p, o)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
 	},
 }
 

@@ -9,6 +9,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	_ "github.com/svenliebig/work-environment/pkg/ci/bamboo"
 )
 
 // rootCmd represents the base command when called without any subcommands

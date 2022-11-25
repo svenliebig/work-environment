@@ -1,26 +1,37 @@
 package ci
 
 import (
-	"context"
-	"encoding/json"
+	gocontext "context"
 	"fmt"
-	"os"
-	"path/filepath"
+	"strings"
 
+	"github.com/svenliebig/work-environment/pkg/context"
+	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils/bamboo"
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
-	"github.com/svenliebig/work-environment/pkg/utils/wepath"
+	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func Create(p string, url string, ciType string, name string, auth string) error {
-	wer, err := wepath.GetWorkEnvironmentRoot(p)
+func Create(ctx *context.Context, url string, ciType string, name string, auth string) error {
+	override := false
+	config, err := ctx.GetConfiguration()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: error while trying to get the config", err)
+	}
+
+	if config.HasCI(name) {
+		q := fmt.Sprintf("\nThe Identifier '%s' is already declared in your configuration.\nDo you want to overwrite it? [y/n] ", cli.Colorize(cli.Purple, name))
+		answer := cli.Question(q, []string{"y", "n"})
+		if answer == "n" {
+			fmt.Printf("%s the process.\n", cli.Colorize(cli.Red, "Abort"))
+			return nil
+		} else {
+			override = true
+		}
 	}
 
 	// TODO validate parameters
-
 	if ciType != "bamboo" {
 		fmt.Printf("the type %q is not a valid ci type\n", ciType)
 		return nil
@@ -31,48 +42,45 @@ func Create(p string, url string, ciType string, name string, auth string) error
 		AuthToken: auth,
 	}
 
-	version, err := client.GetInfo(context.Background())
+	version, err := client.GetInfo(gocontext.Background())
 
 	if err != nil {
 		return err
 	}
 
-	cp := filepath.Join(wer, ConfigFilename)
-
-	if wepath.Exists(cp) {
-		c, err := ReadConfig(cp)
-
-		if err != nil {
-			return err
-		}
-
-		if c.Contains(name) {
-			answer := cli.Question(fmt.Sprintf("\nthe identifier %q is already declared in the config of your work environment, do you want to override it? (y/n) ", name), []string{"y", "n"})
-			if answer == "n" {
-				return nil
-			}
-		}
-	}
-
-	ci := &CI{
+	ci := &core.CI{
 		CiType:     ciType,
 		Identifier: name,
 		AuthToken:  auth,
 		Url:        url,
 	}
 
-	result, err := json.MarshalIndent(&CIConfig{Environments: []*CI{ci}}, "", "  ")
+	if override {
+		err = ctx.UpdateCIEnvironmentToConfiguration(ci)
+	} else {
+		err = ctx.AddCIEnvironmentToConfiguration(ci)
+	}
 
 	if err != nil {
 		return err
 	}
 
-	if err := os.WriteFile(cp, result, 0644); err != nil {
+	err = ctx.UpdateConfig()
+
+	if err != nil {
 		return err
 	}
 
-	// TODO make this pretty
-	fmt.Printf("\nsuccessfully added a new CI to the work environment:\n\tidentifier: %s\n\ttype: %s\n\tversion: %s\n\turl: %s\n\n", name, ciType, version.Version, url)
+	fmt.Printf("\n%s added a new CI to your work environment:\n\n", cli.Colorize(cli.Green, "Successfully"))
+
+	w := &tablewriter.TableWriter{}
+	fmt.Fprintf(w, "  Identifier: \t%s", ci.Identifier)
+	fmt.Fprintf(w, "  Type: \t%s", ci.CiType)
+	fmt.Fprintf(w, "  URL: \t%s", ci.Url)
+	fmt.Fprintf(w, "  Version: \t%s", version.Version)
+	fmt.Fprintf(w, "  Token: \t%s", strings.Repeat("*", len(ci.AuthToken)))
+	w.Print()
+	fmt.Println()
 
 	return nil
 }

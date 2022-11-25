@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/svenliebig/work-environment/pkg/ci"
+	"github.com/svenliebig/work-environment/pkg/context"
 	"github.com/svenliebig/work-environment/pkg/utils"
 )
 
@@ -67,7 +68,7 @@ create a globally available work environment CI.`,
 				log.Fatal(err)
 			}
 
-			err = ci.Create(p, u, ciType, name, auth)
+			err = ci.Create(&context.Context{Path: p}, u, ciType, name, auth)
 
 			if err != nil {
 				log.Fatal(err)
@@ -106,12 +107,15 @@ work environment.`,
 			}
 
 			p, err := utils.GetPath([]string{})
+			c := &context.Context{
+				Path: p,
+			}
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = ci.Add(p, ciId, project, bambooKey, suggest)
+			err = ci.Add(c, ciId, project, bambooKey, suggest)
 
 			if err != nil {
 				log.Fatal(err)
@@ -124,36 +128,81 @@ work environment.`,
 		Long: `Opens the CI environment of you current project path in the browser
 the project path is your current working directory, the project needs to
 have a CI configured.`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			p, err := utils.GetPath([]string{})
+			c := &context.Context{
+				Path: p,
+			}
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = ci.Open(p)
+			err = ci.Open(c)
 
 			if err != nil {
-				log.Fatal(err)
+				return fmt.Errorf("%w", err)
 			}
+
+			return nil
 		},
 	}
 	listCmd = &cobra.Command{
 		Use:   "list",
 		Short: "Lists the available CI environments in your work environment",
 		Long:  `Lists the available CI environments in your work environment`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			p, err := utils.GetPath([]string{})
+			c := &context.Context{
+				Path: p,
+			}
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = ci.List(p)
+			err = ci.List(c)
+			return err
+		},
+	}
+	infoCmd = &cobra.Command{
+		Use:   "info",
+		Short: "Lists the available information for the ci that is configured for the project",
+		Long: `Lists the available information for the ci that is configured for the project,
+the project path is your current working directory, the project needs to
+have a CI configured.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			p, err := utils.GetPath([]string{})
+			c := &context.Context{
+				Path: p,
+			}
 
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			err = ci.Info(c)
+			return err
+		},
+	}
+	removeCmd = &cobra.Command{
+		Use:   "remove",
+		Short: "Removes the ci configuration from a project",
+		Long: `Removes the ci configuration from a project,
+the project path is your current working directory, the project needs to
+have a CI configured.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			p, err := utils.GetPath([]string{})
+			c := &context.Context{
+				Path: p,
+			}
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = ci.Remove(c)
+			return err
 		},
 	}
 )
@@ -164,6 +213,8 @@ func init() {
 	ciCmd.AddCommand(addCmd)
 	ciCmd.AddCommand(openCmd)
 	ciCmd.AddCommand(listCmd)
+	ciCmd.AddCommand(infoCmd)
+	ciCmd.AddCommand(removeCmd)
 
 	createCmd.Flags().StringP("url", "u", "", "the URL of the CI you want to add\nexample: 'https://bamboo.company.com'")
 	createCmd.Flags().StringP("type", "t", "", "the CI type, currently available types are 'bamboo'\nexample: 'bamboo'")

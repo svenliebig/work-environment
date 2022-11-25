@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -9,7 +10,6 @@ import (
 	"path/filepath"
 
 	"github.com/mattn/go-zglob"
-	"github.com/svenliebig/work-environment/pkg/config"
 	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils/git"
 )
@@ -18,20 +18,20 @@ type InitializeOptions struct {
 	Override bool
 }
 
-func Do(p string, o *InitializeOptions) {
-	weDir := filepath.Join(p, ".work-environment")
-	weConfigPath := filepath.Join(weDir, "config.json")
+// TODO beautify
+func Do(p string, o *InitializeOptions) error {
+	configPath := filepath.Join(p, core.ConfigurationFileName)
 
 	if o == nil || !o.Override {
-		fi, err := os.Stat(weConfigPath)
+		fi, err := os.Stat(configPath)
 
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			log.Fatal(err)
 		}
 
 		if fi != nil {
-			fmt.Printf("configuration does already exist in:\n  %q\n\nif you want to override the existing configuration run:\n  we init --override\n", weConfigPath)
-			return
+			fmt.Printf("configuration does already exist in:\n  %q\n\nif you want to override the existing configuration run:\n  we init --override\n", configPath)
+			return nil
 		}
 	}
 
@@ -68,26 +68,44 @@ func Do(p string, o *InitializeOptions) {
 	// TODO warnings for same identifier
 
 	if o.Override {
-		err = os.Remove(weConfigPath)
+		err = os.Remove(configPath)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = config.Write(weConfigPath, projects)
+		err := write(configPath, projects)
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		fmt.Printf("Overwritten: Saved %d projects to your work-environment in %q.\n", len(projects), weConfigPath)
+		fmt.Printf("Overwritten: Saved %d projects to your work-environment in %q.\n", len(projects), configPath)
 	} else {
-		err = config.Write(weConfigPath, projects)
+		err = write(configPath, projects)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Printf("Saved %d projects to your work-environment in %q.\n", len(projects), weConfigPath)
+		fmt.Printf("Saved %d projects to your work-environment in %q.\n", len(projects), configPath)
 	}
+
+	return nil
+}
+
+func write(configPath string, projects []*core.Project) error {
+	result, err := json.MarshalIndent(&core.ConfigurationNew{Projects: projects}, "", "  ")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = os.WriteFile(configPath, result, 0644)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
