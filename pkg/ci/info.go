@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/svenliebig/work-environment/pkg/context"
+	"github.com/svenliebig/work-environment/pkg/utils/cli"
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
@@ -25,10 +26,12 @@ func Info(ctx *context.Context) error {
 		return err
 	}
 
-	fmt.Printf("\nConfigured CI for %q:\n\n", p.Identifier)
+	fmt.Printf("Configured CI for '%s':\n\n", cli.Colorize(cli.Purple, p.Identifier))
 	w := &tablewriter.TableWriter{}
 	fmt.Fprintf(w, "  %s: \t%s", "CI Identifier", ci.Identifier)
+	fmt.Fprintf(w, "  %s: \t%s", "CI Type", ci.CiType)
 	fmt.Fprintf(w, "  %s: \t%s", "CI URL", ci.Url)
+	fmt.Fprintf(w, "  %s: \t%s", "CI Version", ci.Version)
 	fmt.Fprintf(w, "  %s: \t%s", "Project Key", p.CI.ProjectKey)
 	w.Print()
 	fmt.Println()

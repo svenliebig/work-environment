@@ -53,6 +53,7 @@ func Create(ctx *context.Context, url string, ciType string, name string, auth s
 		Identifier: name,
 		AuthToken:  auth,
 		Url:        url,
+		Version:    version.Version,
 	}
 
 	if override {

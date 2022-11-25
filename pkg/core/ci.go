@@ -5,4 +5,5 @@ type CI struct {
 	Identifier string
 	AuthToken  string
 	Url        string
+	Version    string
 }
