@@ -22,7 +22,7 @@ var (
 // Project Context is inherits the WE Context
 type Context struct {
 	// the cwd path
-	Path string
+	Cwd string
 
 	ciId              string
 	configurationPath string
@@ -65,7 +65,7 @@ func (c *Context) GetProject() (*core.Project, error) {
 	}
 
 	for _, project := range config.Projects {
-		if strings.Contains(c.Path, project.Path) {
+		if strings.Contains(c.Cwd, project.Path) {
 			// TODO multiple projects found
 			c.project = project
 			return c.project, nil

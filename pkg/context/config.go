@@ -15,7 +15,7 @@ import (
 
 func (c *Context) GetConfiguration() (*core.Configuration, error) {
 	if c.configuration == nil {
-		p, err := getConfigurationPath(c.Path)
+		p, err := getConfigurationPath(c.Cwd)
 
 		if err != nil {
 			return nil, err

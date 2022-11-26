@@ -68,7 +68,7 @@ create a globally available work environment CI.`,
 				log.Fatal(err)
 			}
 
-			err = ci.Create(&context.Context{Path: p}, u, ciType, name, auth)
+			err = ci.Create(&context.Context{Cwd: p}, u, ciType, name, auth)
 
 			if err != nil {
 				log.Fatal(err)
@@ -108,7 +108,7 @@ work environment.`,
 
 			p, err := utils.GetPath([]string{})
 			c := &context.Context{
-				Path: p,
+				Cwd: p,
 			}
 
 			if err != nil {
@@ -131,7 +131,7 @@ have a CI configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			p, err := utils.GetPath([]string{})
 			c := &context.Context{
-				Path: p,
+				Cwd: p,
 			}
 
 			if err != nil {
@@ -154,7 +154,7 @@ have a CI configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			p, err := utils.GetPath([]string{})
 			c := &context.Context{
-				Path: p,
+				Cwd: p,
 			}
 
 			if err != nil {
@@ -174,7 +174,7 @@ have a CI configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			p, err := utils.GetPath([]string{})
 			c := &context.Context{
-				Path: p,
+				Cwd: p,
 			}
 
 			if err != nil {
@@ -194,7 +194,7 @@ have a CI configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			p, err := utils.GetPath([]string{})
 			c := &context.Context{
-				Path: p,
+				Cwd: p,
 			}
 
 			if err != nil {

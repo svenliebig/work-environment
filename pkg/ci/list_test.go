@@ -9,7 +9,7 @@ import (
 func TestList(t *testing.T) {
 
 	t.Run("should use the tabwriter", func(t *testing.T) {
-		err := List(&context.Context{Path: "/Users/sven.liebig/workspace/repositories/isbj/commons/ansible-paas"})
+		err := List(&context.Context{Cwd: "/Users/sven.liebig/workspace/repositories/isbj/commons/ansible-paas"})
 
 		if err != nil {
 			t.Fatal(err)

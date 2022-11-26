@@ -7,7 +7,7 @@ import (
 func TestContext_GetConfiguration(t *testing.T) {
 	t.Run("should find a configuration", func(t *testing.T) {
 		c := &Context{
-			Path: "/Users/sven.liebig/workspace/repositories/isbj/redesign/kita",
+			Cwd: "/Users/sven.liebig/workspace/repositories/isbj/redesign/kita",
 		}
 
 		_, err := c.GetConfiguration()
