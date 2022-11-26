@@ -1,8 +1,43 @@
 package ci
 
 import (
+	"fmt"
 	"testing"
 )
+
+type C interface {
+	Hello() string
+}
+
+type D interface {
+	C
+}
+
+type A struct {
+	Hello string
+}
+
+func (a *A) Get() string {
+	return a.Hello
+}
+
+type B struct {
+}
+
+func (b *B) Hello() string {
+	return ""
+}
+
+var (
+	d D = &B{}
+)
+
+func TestThings(t *testing.T) {
+	t.Run("inheritance things", func(t *testing.T) {
+		fmt.Println(d)
+		t.Fatal()
+	})
+}
 
 // @comm @alex
 

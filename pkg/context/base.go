@@ -7,9 +7,22 @@ import (
 	"github.com/svenliebig/work-environment/pkg/core"
 )
 
+var (
+	_ baseContext = &BaseContext{}
+)
+
+type baseContext interface {
+	Configuration() *core.Configuration
+	ConfigurationPath() string
+	Close() error
+	Validate() error
+}
+
 // this contains a base context for the work environment commands
 // it secures to contain a work environment configuration set but
-// not a project
+// not a project.
+//
+// the current working directory is required.
 type BaseContext struct {
 	// the current working directory from where the command is called
 	Cwd string
