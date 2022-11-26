@@ -6,17 +6,17 @@ import (
 
 const ConfigurationFileName = ".work-environment.json"
 
-type ConfigurationNew struct {
+type Configuration struct {
 	Projects       []*Project
 	CIEnvironments []*CI
-}
 
-type Configuration interface {
-	Write() error
+	// tells if the configuration has been modified since
+	// the last reading or writing from the configuration file
+	dirty bool
 }
 
 // returns the ci environment with the given identifier, if it exists
-func (c *ConfigurationNew) GetCIEnvironmentById(identifier string) (*CI, error) {
+func (c *Configuration) GetCIEnvironmentById(identifier string) (*CI, error) {
 	if len(c.CIEnvironments) == 0 {
 		return nil, errors.New("no ci environments defined")
 	} else {
@@ -33,7 +33,7 @@ func (c *ConfigurationNew) GetCIEnvironmentById(identifier string) (*CI, error) 
 	}
 }
 
-func (c *ConfigurationNew) HasCI(id string) bool {
+func (c *Configuration) HasCI(id string) bool {
 	for _, ci := range c.CIEnvironments {
 		if ci.Identifier == id {
 			return true
@@ -43,7 +43,7 @@ func (c *ConfigurationNew) HasCI(id string) bool {
 }
 
 // Put this into context?
-func (c *ConfigurationNew) UpdateProjectCI(identifier string, pci *ProjectCI) error {
+func (c *Configuration) UpdateProjectCI(identifier string, pci *ProjectCI) error {
 	for _, p := range c.Projects {
 		if p.Identifier == identifier {
 			p.CI = pci
@@ -52,4 +52,41 @@ func (c *ConfigurationNew) UpdateProjectCI(identifier string, pci *ProjectCI) er
 	}
 
 	return errors.New("project not found")
+}
+
+// checks the configuration for a project identifier
+// returns true and a pointer to the project, in case
+// a project got found
+func (c *Configuration) ContainsProject(identifier string) (bool, *Project) {
+	for _, project := range c.Projects {
+		if project.Identifier == identifier {
+			return true, project
+		}
+	}
+	return false, nil
+}
+
+func (c *Configuration) AddProject(p *Project) {
+	c.dirty = true
+	c.Projects = append(c.Projects, p)
+}
+
+func (c *Configuration) RemoveProject(p *Project) error {
+	c.dirty = true
+	for i, pr := range c.Projects {
+		if pr.Identifier == p.Identifier {
+			t := make([]*Project, 0, len(c.Projects)-1)
+			p := c.Projects[:i]
+			t = append(t, p...)
+			e := c.Projects[i+1:]
+			t = append(t, e...)
+			c.Projects = t
+			return nil
+		}
+	}
+	return errors.New("project not found")
+}
+
+func (c *Configuration) IsDirty() bool {
+	return c.dirty
 }

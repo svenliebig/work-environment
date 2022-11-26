@@ -65,3 +65,8 @@ func (w *TableWriter) Print() {
 		fmt.Printf("\n")
 	}
 }
+
+func (w *TableWriter) Flush() {
+	w.lines = make([]string, 0)
+	w.maxColumnsWidth = make([]int, 0)
+}

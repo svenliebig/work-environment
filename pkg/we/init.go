@@ -1,4 +1,4 @@
-package initialize
+package we
 
 import (
 	"encoding/json"
@@ -35,34 +35,10 @@ func Do(p string, o *InitializeOptions) error {
 		}
 	}
 
-	x := path.Join(p, "**", ".git")
-
-	// TODO ignore node_modules and other heavy things we don't want
-	dirs, err := zglob.Glob(x)
+	projects, err := scanForProjects(p)
 
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	projects := make([]*core.Project, len(dirs))
-	for i, dir := range dirs {
-		projectPath, _ := filepath.Split(dir)
-		projectPath = filepath.Clean(projectPath)
-		identifier := filepath.Base(projectPath)
-
-		remoteUrl, err := git.RepositoryGetRemoteOriginUrl(projectPath)
-
-		if err != nil {
-			fmt.Printf("ERR while trying to create project for %q:\n%s", identifier, err)
-		}
-
-		projects[i] = &core.Project{
-			Identifier: identifier,
-			Path:       projectPath,
-			Git: &core.ProjectGit{
-				RemoteUrl: remoteUrl,
-			},
-		}
 	}
 
 	// TODO warnings for same identifier
@@ -95,7 +71,7 @@ func Do(p string, o *InitializeOptions) error {
 }
 
 func write(configPath string, projects []*core.Project) error {
-	result, err := json.MarshalIndent(&core.ConfigurationNew{Projects: projects}, "", "  ")
+	result, err := json.MarshalIndent(&core.Configuration{Projects: projects}, "", "  ")
 
 	if err != nil {
 		log.Fatal(err)
@@ -108,4 +84,38 @@ func write(configPath string, projects []*core.Project) error {
 	}
 
 	return nil
+}
+
+func scanForProjects(p string) ([]*core.Project, error) {
+	x := path.Join(p, "**", ".git")
+
+	// TODO ignore node_modules and other heavy things we don't want
+	dirs, err := zglob.Glob(x)
+
+	if err != nil {
+		return nil, err
+	}
+
+	projects := make([]*core.Project, len(dirs))
+	for i, dir := range dirs {
+		projectPath, _ := filepath.Split(dir)
+		projectPath = filepath.Clean(projectPath)
+		identifier := filepath.Base(projectPath)
+
+		remoteUrl, err := git.RepositoryGetRemoteOriginUrl(projectPath)
+
+		if err != nil {
+			fmt.Printf("ERR while trying to create project for %q:\n%s", identifier, err)
+		}
+
+		projects[i] = &core.Project{
+			Identifier: identifier,
+			Path:       projectPath,
+			Git: &core.ProjectGit{
+				RemoteUrl: remoteUrl,
+			},
+		}
+	}
+
+	return projects, nil
 }

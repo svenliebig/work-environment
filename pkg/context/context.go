@@ -26,7 +26,7 @@ type Context struct {
 
 	ciId              string
 	configurationPath string
-	configuration     *core.ConfigurationNew
+	configuration     *core.Configuration
 	project           *core.Project
 }
 

@@ -13,7 +13,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/wepath"
 )
 
-func (c *Context) GetConfiguration() (*core.ConfigurationNew, error) {
+func (c *Context) GetConfiguration() (*core.Configuration, error) {
 	if c.configuration == nil {
 		p, err := getConfigurationPath(c.Path)
 
@@ -34,7 +34,7 @@ func (c *Context) GetConfiguration() (*core.ConfigurationNew, error) {
 	return c.configuration, nil
 }
 
-func readConfig(p string) (*core.ConfigurationNew, error) {
+func readConfig(p string) (*core.Configuration, error) {
 	file, err := os.Open(p)
 
 	// @Comm
@@ -50,7 +50,7 @@ func readConfig(p string) (*core.ConfigurationNew, error) {
 		return nil, fmt.Errorf("%w: err reading config file", err)
 	}
 
-	var config core.ConfigurationNew
+	var config core.Configuration
 
 	if err := json.Unmarshal(content, &config); err != nil {
 		return nil, err

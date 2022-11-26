@@ -41,3 +41,16 @@ func BenchmarkGetWorkReadingFromArrayWith4EntriesGettingThe3rdComplex(b *testing
 		ArrayWith4EntriesGettingThe3rdComplex()
 	}
 }
+
+// @comm @alex, why is that
+func BenchmarkArrayCreationCap(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = make([]string, 0, 100)
+	}
+}
+
+func BenchmarkArrayCreationSize(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		_ = make([]string, 100)
+	}
+}
