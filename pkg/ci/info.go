@@ -10,12 +10,7 @@ import (
 )
 
 func Info(ctx *context.Context) error {
-	p, err := ctx.GetProject()
-
-	if err != nil {
-		return err
-	}
-
+	p := ctx.Project()
 	ci, err := ctx.GetCI()
 
 	if err != nil {
@@ -26,7 +21,7 @@ func Info(ctx *context.Context) error {
 		return err
 	}
 
-	fmt.Printf("Configured CI for '%s':\n\n", cli.Colorize(cli.Purple, p.Identifier))
+	fmt.Printf("\nConfigured CI for '%s':\n\n", cli.Colorize(cli.Purple, p.Identifier))
 	w := &tablewriter.TableWriter{}
 	fmt.Fprintf(w, "  %s: \t%s", "CI Identifier", ci.Identifier)
 	fmt.Fprintf(w, "  %s: \t%s", "CI Type", ci.CiType)

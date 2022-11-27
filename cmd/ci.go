@@ -68,7 +68,20 @@ create a globally available work environment CI.`,
 				log.Fatal(err)
 			}
 
-			err = ci.Create(&context.Context{Cwd: p}, u, ciType, name, auth)
+			ctx := &context.BaseContext{Cwd: p}
+			err = ctx.Validate()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = ctx.Validate()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = ci.Create(ctx, u, ciType, name, auth)
 
 			if err != nil {
 				log.Fatal(err)
@@ -115,6 +128,12 @@ work environment.`,
 				log.Fatal(err)
 			}
 
+			err = c.Validate()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			err = ci.Add(c, ciId, project, bambooKey, suggest)
 
 			if err != nil {
@@ -138,6 +157,12 @@ have a CI configured.`,
 				log.Fatal(err)
 			}
 
+			err = c.Validate()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			err = ci.Open(c)
 
 			if err != nil {
@@ -153,9 +178,15 @@ have a CI configured.`,
 		Long:  `Lists the available CI environments in your work environment`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			p, err := utils.GetPath([]string{})
-			c := &context.Context{
+			c := &context.BaseContext{
 				Cwd: p,
 			}
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = c.Validate()
 
 			if err != nil {
 				log.Fatal(err)
@@ -181,6 +212,12 @@ have a CI configured.`,
 				log.Fatal(err)
 			}
 
+			err = c.Validate()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			err = ci.Info(c)
 			return err
 		},
@@ -196,6 +233,38 @@ have a CI configured.`,
 			c := &context.Context{
 				Cwd: p,
 			}
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = c.Validate()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = ci.Remove(c)
+			return err
+		},
+	}
+	resultCmd = &cobra.Command{
+		Use:   "result",
+		Short: "Prints the latest CI build results or the currently running build",
+		Long: `Prints the latest CI build results or the currently running build,
+if the build is currently running. See also 'we ci results' to look at
+a history of build results.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			p, err := utils.GetPath([]string{})
+			c := &context.Context{
+				Cwd: p,
+			}
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = c.Validate()
 
 			if err != nil {
 				log.Fatal(err)

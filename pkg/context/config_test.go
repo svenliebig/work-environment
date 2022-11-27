@@ -10,11 +10,10 @@ func TestContext_GetConfiguration(t *testing.T) {
 			Cwd: "/Users/sven.liebig/workspace/repositories/isbj/redesign/kita",
 		}
 
-		_, err := c.GetConfiguration()
-
-		if err != nil {
-			t.Errorf("Context.GetConfiguration() error = %v", err)
-			return
+		if err := c.Validate(); err != nil {
+			t.Fatal(err)
 		}
+
+		_ = c.Configuration()
 	})
 }

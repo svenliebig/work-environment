@@ -51,11 +51,7 @@ func (c *client) GetBranchPlans() ([]*ci.BranchPlan, error) {
 		return nil, err
 	}
 
-	p, err := c.ctx.GetProject()
-
-	if err != nil {
-		return nil, err
-	}
+	p := c.ctx.Project()
 
 	b, err := p.GetBranchName()
 
@@ -88,12 +84,7 @@ func (c *client) GetPlanSuggestion() (string, error) {
 		return "", err
 	}
 
-	p, err := c.ctx.GetProject()
-
-	if err != nil {
-		return "", err
-	}
-
+	p := c.ctx.Project()
 	sr, err := bc.SearchPlans(p.Identifier)
 
 	if err != nil {

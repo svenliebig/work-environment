@@ -11,27 +11,18 @@ import (
 // TODO suggest could be an extra cmd
 // TODO configurations should be like a context object
 func Add(ctx *context.Context, ciId string, projectId string, key string, suggest bool) error {
-	config, err := ctx.GetConfiguration()
-
-	if err != nil {
-		return fmt.Errorf("%w: error while trying to get the config", err)
-	}
-
-	project, err := ctx.GetProject()
-
-	if err != nil {
-		return fmt.Errorf("%w: error while trying to get the project", err)
-	}
+	config := ctx.Configuration()
+	project := ctx.Project()
 
 	if ciId != "" {
-		err = ctx.UseCI(ciId)
+		err := ctx.UseCI(ciId)
 
 		if err != nil {
 			return fmt.Errorf("%w: error while trying to call use ci", err)
 		}
 	} else {
 		fmt.Println("use", config.CIEnvironments[0].Identifier)
-		err = ctx.UseCI(config.CIEnvironments[0].Identifier)
+		err := ctx.UseCI(config.CIEnvironments[0].Identifier)
 
 		if err != nil {
 			return fmt.Errorf("%w: error while trying to call use ci", err)
@@ -64,7 +55,7 @@ func Add(ctx *context.Context, ciId string, projectId string, key string, sugges
 		}
 
 		// TODO set dirty and defer ctx.object.something() das dann schreibt
-		err = ctx.UpdateConfig()
+		err = ctx.Close()
 
 		if err != nil {
 			return err

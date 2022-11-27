@@ -54,15 +54,7 @@ config directory will be updated by deleting projects that are not available any
 and adding projects that are new.`,
 		Args: cobra.MatchAll(cobra.RangeArgs(0, 1), cobra.OnlyValidArgs),
 		Run: func(cmd *cobra.Command, args []string) {
-			p, err := utils.GetPath([]string{})
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			ctx := &context.BaseContext{Cwd: p}
-
-			err = ctx.Validate()
+			ctx, err := context.CreateBaseContext()
 
 			if err != nil {
 				log.Fatal(err)

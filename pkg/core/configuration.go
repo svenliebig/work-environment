@@ -4,6 +4,11 @@ import (
 	"errors"
 )
 
+var (
+	ErrCIAlreadyExists = errors.New("a ci with that identifier does already exists")
+	ErrNoSuchCI        = errors.New("there is no ci with that identifier available")
+)
+
 const ConfigurationFileName = ".work-environment.json"
 
 type Configuration struct {
@@ -44,6 +49,8 @@ func (c *Configuration) HasCI(id string) bool {
 
 // Put this into context?
 func (c *Configuration) UpdateProjectCI(identifier string, pci *ProjectCI) error {
+	c.dirty = true
+
 	for _, p := range c.Projects {
 		if p.Identifier == identifier {
 			p.CI = pci
@@ -66,6 +73,7 @@ func (c *Configuration) ContainsProject(identifier string) (bool, *Project) {
 	return false, nil
 }
 
+// adds a project to the configuration and sets it's dirty flag
 func (c *Configuration) AddProject(p *Project) {
 	c.dirty = true
 	c.Projects = append(c.Projects, p)
@@ -85,6 +93,37 @@ func (c *Configuration) RemoveProject(p *Project) error {
 		}
 	}
 	return errors.New("project not found")
+}
+
+func (c *Configuration) AddCI(ci *CI) error {
+	c.dirty = true
+
+	if c.CIEnvironments == nil {
+		c.CIEnvironments = []*CI{ci}
+	} else {
+		for _, cie := range c.CIEnvironments {
+			if cie.Identifier == ci.Identifier {
+				return ErrCIAlreadyExists
+			}
+		}
+
+		c.CIEnvironments = append(c.CIEnvironments, ci)
+	}
+
+	return nil
+}
+
+func (c *Configuration) UpdateCI(ci *CI) error {
+	c.dirty = true
+
+	for i, cie := range c.CIEnvironments {
+		if cie.Identifier == ci.Identifier {
+			c.CIEnvironments[i] = ci
+			return nil
+		}
+	}
+
+	return ErrNoSuchCI
 }
 
 func (c *Configuration) IsDirty() bool {

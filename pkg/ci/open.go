@@ -8,12 +8,7 @@ import (
 )
 
 func Open(ctx *context.Context) error {
-	p, err := ctx.GetProject()
-
-	if err != nil {
-		return fmt.Errorf("%w: error while trying to get the project", err)
-	}
-
+	p := ctx.Project()
 	c, err := ctx.GetCI()
 
 	if err != nil {

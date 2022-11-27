@@ -2,9 +2,11 @@ package context
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 
 	"github.com/svenliebig/work-environment/pkg/core"
+	"github.com/svenliebig/work-environment/pkg/utils"
 )
 
 var (
@@ -18,6 +20,25 @@ type baseContext interface {
 	Validate() error
 }
 
+func CreateBaseContext() (*BaseContext, error) {
+	p, err := utils.GetPath([]string{})
+	c := &BaseContext{
+		Cwd: p,
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.Validate()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
 // this contains a base context for the work environment commands
 // it secures to contain a work environment configuration set but
 // not a project.
@@ -27,6 +48,7 @@ type BaseContext struct {
 	// the current working directory from where the command is called
 	Cwd string
 
+	validated         bool
 	configurationPath string
 	configuration     *core.Configuration
 }
@@ -52,19 +74,33 @@ func (c *BaseContext) Validate() error {
 
 	c.configurationPath = p
 	c.configuration = config
+	c.validated = true
 
 	return nil
 }
 
 func (c *BaseContext) Configuration() *core.Configuration {
+	if !c.validated {
+		notValidated()
+	}
+
 	return c.configuration
 }
 
 func (c *BaseContext) ConfigurationPath() string {
+	if !c.validated {
+		notValidated()
+	}
+
 	return c.configurationPath
 }
 
+// writes the configuration if it's dirty
 func (c *BaseContext) Close() error {
+	if !c.validated {
+		notValidated()
+	}
+
 	if c.configuration.IsDirty() {
 		return c.updateConfig()
 	}
@@ -86,4 +122,8 @@ func (c *BaseContext) updateConfig() error {
 	}
 
 	return nil
+}
+
+func notValidated() {
+	log.Fatal("context used before calling Validate()")
 }

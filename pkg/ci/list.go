@@ -8,12 +8,8 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func List(ctx *context.Context) error {
-	config, err := ctx.GetConfiguration()
-
-	if err != nil {
-		return fmt.Errorf("%w: error while trying to read the ci configuration", err)
-	}
+func List(ctx *context.BaseContext) error {
+	config := ctx.Configuration()
 
 	w := &tablewriter.TableWriter{}
 	fmt.Printf("\nAvailable CI Environments:\n\n")

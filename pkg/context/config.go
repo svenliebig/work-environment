@@ -13,27 +13,6 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/wepath"
 )
 
-func (c *Context) GetConfiguration() (*core.Configuration, error) {
-	if c.configuration == nil {
-		p, err := getConfigurationPath(c.Cwd)
-
-		if err != nil {
-			return nil, err
-		}
-
-		config, err := readConfig(p)
-
-		if err != nil {
-			return nil, err
-		}
-
-		c.configurationPath = p
-		c.configuration = config
-	}
-
-	return c.configuration, nil
-}
-
 func readConfig(p string) (*core.Configuration, error) {
 	file, err := os.Open(p)
 
@@ -89,47 +68,4 @@ func getConfiguration(p string) (string, error) {
 	}
 
 	return getConfiguration(filepath.Dir(p))
-}
-
-func (c *Context) UpdateConfig() error {
-	result, err := json.MarshalIndent(c.configuration, "", "  ")
-
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(c.configurationPath, result, 0644)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Context) AddCIEnvironmentToConfiguration(ci *core.CI) error {
-	if c.configuration.CIEnvironments == nil {
-		c.configuration.CIEnvironments = []*core.CI{ci}
-	} else {
-		for _, cie := range c.configuration.CIEnvironments {
-			if cie.Identifier == ci.Identifier {
-				return ErrCIAlreadyExists
-			}
-		}
-
-		c.configuration.CIEnvironments = append(c.configuration.CIEnvironments, ci)
-	}
-
-	return nil
-}
-
-func (c *Context) UpdateCIEnvironmentToConfiguration(ci *core.CI) error {
-	for i, cie := range c.configuration.CIEnvironments {
-		if cie.Identifier == ci.Identifier {
-			c.configuration.CIEnvironments[i] = ci
-			return nil
-		}
-	}
-
-	return ErrNoSuchCI
 }

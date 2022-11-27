@@ -9,17 +9,8 @@ import (
 )
 
 func Remove(ctx *context.Context) error {
-	config, err := ctx.GetConfiguration()
-
-	if err != nil {
-		return fmt.Errorf("%w: error while trying to get the config", err)
-	}
-
-	p, err := ctx.GetProject()
-
-	if err != nil {
-		return fmt.Errorf("%w: error while trying to get the project", err)
-	}
+	config := ctx.Configuration()
+	p := ctx.Project()
 
 	ci, err := ctx.GetCI()
 
@@ -38,7 +29,7 @@ func Remove(ctx *context.Context) error {
 		return fmt.Errorf("%w: error while trying to update the project ci", err)
 	}
 
-	err = ctx.UpdateConfig()
+	err = ctx.Close()
 
 	if err != nil {
 		return fmt.Errorf("%w: error while trying to update the config", err)

@@ -39,6 +39,10 @@ func TestThings(t *testing.T) {
 	})
 }
 
+type CI struct {
+	Identifier string
+}
+
 // @comm @alex
 
 func MapWith4EntriesGettingThe3rdComplex() *CI {

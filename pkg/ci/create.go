@@ -12,13 +12,9 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func Create(ctx *context.Context, url string, ciType string, name string, auth string) error {
+func Create(ctx *context.BaseContext, url string, ciType string, name string, auth string) error {
 	override := false
-	config, err := ctx.GetConfiguration()
-
-	if err != nil {
-		return fmt.Errorf("%w: error while trying to get the config", err)
-	}
+	config := ctx.Configuration()
 
 	if config.HasCI(name) {
 		q := fmt.Sprintf("\nThe Identifier '%s' is already declared in your configuration.\nDo you want to overwrite it? [y/n] ", cli.Colorize(cli.Purple, name))
@@ -57,16 +53,16 @@ func Create(ctx *context.Context, url string, ciType string, name string, auth s
 	}
 
 	if override {
-		err = ctx.UpdateCIEnvironmentToConfiguration(ci)
+		err = config.UpdateCI(ci)
 	} else {
-		err = ctx.AddCIEnvironmentToConfiguration(ci)
+		err = config.AddCI(ci)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	err = ctx.UpdateConfig()
+	err = ctx.Close()
 
 	if err != nil {
 		return err
