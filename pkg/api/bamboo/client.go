@@ -8,8 +8,6 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/rest"
 )
 
-// TODO move to an API package
-
 // creates a client to communicate with an instance of bamboo
 //
 // needs atleast the BaseUrl and AuthToken to work

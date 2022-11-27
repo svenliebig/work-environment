@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/svenliebig/work-environment/pkg/api/bamboo"
 	"github.com/svenliebig/work-environment/pkg/ci"
 	"github.com/svenliebig/work-environment/pkg/context"
-	"github.com/svenliebig/work-environment/pkg/utils/bamboo"
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
 )
 

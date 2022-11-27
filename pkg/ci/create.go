@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/svenliebig/work-environment/pkg/api/bamboo"
 	"github.com/svenliebig/work-environment/pkg/context"
 	"github.com/svenliebig/work-environment/pkg/core"
-	"github.com/svenliebig/work-environment/pkg/utils/bamboo"
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
