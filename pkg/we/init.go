@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 
-	"github.com/mattn/go-zglob"
 	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils/git"
 )
@@ -87,14 +86,76 @@ func write(configPath string, projects []*core.Project) error {
 }
 
 func scanForProjects(p string) ([]*core.Project, error) {
-	x := path.Join(p, "**", ".git")
+	dirs := make([]string, 0)
+	filepath.WalkDir(p, func(path string, d fs.DirEntry, err error) error {
+		if d.Name() == "node_modules" {
+			return filepath.SkipDir
+		}
 
-	// TODO ignore node_modules and other heavy things we don't want
-	dirs, err := zglob.Glob(x)
+		if d.Name() == "target" {
+			return filepath.SkipDir
+		}
 
-	if err != nil {
-		return nil, err
+		if d.Name() == ".cache" {
+			return filepath.SkipDir
+		}
+
+		if d.Name() == ".git" {
+			dirs = append(dirs, path)
+			return filepath.SkipDir
+		}
+
+		return nil
+	})
+
+	projects := make([]*core.Project, len(dirs))
+	for i, dir := range dirs {
+		projectPath, _ := filepath.Split(dir)
+		projectPath = filepath.Clean(projectPath)
+		identifier := filepath.Base(projectPath)
+
+		remoteUrl, err := git.RepositoryGetRemoteOriginUrl(projectPath)
+
+		if err != nil {
+			fmt.Printf("ERR while trying to create project for %q:\n%s", identifier, err)
+		}
+
+		projects[i] = &core.Project{
+			Identifier: identifier,
+			Path:       projectPath,
+			Git: &core.ProjectGit{
+				RemoteUrl: remoteUrl,
+			},
+		}
 	}
+
+	return projects, nil
+}
+
+func scanForProjectWalk(p string) ([]*core.Project, error) {
+
+	dirs := make([]string, 0)
+	filepath.WalkDir(p, func(path string, d fs.DirEntry, err error) error {
+		if d.Name() == "node_modules" {
+			return filepath.SkipDir
+		}
+
+		if d.Name() == "target" {
+			return filepath.SkipDir
+		}
+
+		if d.Name() == ".cache" {
+			return filepath.SkipDir
+		}
+
+		if d.Name() == ".git" {
+			dirs = append(dirs, path)
+			return filepath.SkipDir
+		}
+
+		// fmt.Println(path, d.Name(), d.IsDir())
+		return nil
+	})
 
 	projects := make([]*core.Project, len(dirs))
 	for i, dir := range dirs {
