@@ -91,7 +91,21 @@ func (c *client) LatestBuildResult() (*ci.BuildResult, error) {
 		return nil, err
 	}
 
-	results, err := bc.Results(p.CI.ProjectKey, 1)
+	var key string
+
+	branchPlans, err := c.GetBranchPlans()
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(branchPlans) == 1 {
+		key = branchPlans[0].Key
+	} else {
+		key = p.CI.ProjectKey
+	}
+
+	results, err := bc.Results(key, 1)
 
 	if err != nil {
 		return nil, err
@@ -126,7 +140,7 @@ func (c *client) LatestBuildResult() (*ci.BuildResult, error) {
 
 	return &ci.BuildResult{
 		Success:     results.Results.Result[0].BuildState == "Successful",
-		BuildNumber: fmt.Sprintf("%d", results.Results.Result[0].BuildNumber),
+		BuildNumber: fmt.Sprintf("%s-%d", key, results.Results.Result[0].BuildNumber),
 		IsBuilding:  plan.IsBuilding,
 		LogUrl:      fmt.Sprintf("%s/browse/%s/log", c.bambooClient.BaseUrl, results.Results.Result[0].BuildResultKey),
 		Logs:        logs,
