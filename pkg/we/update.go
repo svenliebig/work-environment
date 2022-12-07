@@ -54,11 +54,12 @@ func Update(ctx *context.BaseContext) error {
 		fmt.Print("Added projects:\n\n")
 
 		for _, a := range add {
-			c.Projects = append(c.Projects, a)
+			c.AddProject(a)
 			fmt.Fprintf(w, "  %s \t-> %s", cli.Colorize(cli.Green, a.Identifier), a.Path)
 		}
 		w.Print()
 		w.Flush()
+		fmt.Println()
 	} else {
 		fmt.Print("No new projects.\n\n")
 	}
@@ -91,7 +92,6 @@ func Update(ctx *context.BaseContext) error {
 	if len(add) == 0 && len(delete) == 0 {
 		fmt.Print("\nYour work environment is up to date!\n\n")
 	} else {
-
 		fmt.Printf("\n%s updated your configuration in %q.\n", cli.Colorize(cli.Green, "Successfully"), ctx.ConfigurationPath())
 	}
 
