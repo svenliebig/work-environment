@@ -12,6 +12,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
 )
 
+// TODO this could be in the CI package, to be part of the API
 var (
 	ErrNoCIDefined          = errors.New("no ci defined in this work environment")
 	ErrRequiredIdentifierCI = errors.New("ci identifier is required when there is more than one CI defined in your work environment")
@@ -74,6 +75,62 @@ func (c *client) GetBranchPlans() ([]*ci.BranchPlan, error) {
 	}
 
 	return ret, nil
+}
+
+// LatestBuildResult implements ci.Client
+func (c *client) LatestBuildResult() (*ci.BuildResult, error) {
+	bc, err := c.bamboo()
+
+	if err != nil {
+		return nil, err
+	}
+
+	p := c.ctx.Project()
+
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := bc.Results(p.CI.ProjectKey, 1)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(results.Results.Result) != 1 {
+		return nil, fmt.Errorf("%w: could not find a build result for %s", ci.ErrBuildResultNotFound, p.CI.ProjectKey)
+	}
+
+	plan, err := bc.Plan(p.CI.ProjectKey)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := bc.Result(results.Results.Result[0].BuildResultKey)
+
+	if err != nil {
+		return nil, err
+	}
+
+	logs := make([]string, 0)
+
+	for _, s := range result.Stages.Stage {
+		if s.State == "Failed" {
+			for _, l := range s.Results.Result[0].LogEntries.LogEntry {
+				x := strings.TrimSuffix(fmt.Sprintf("%s\n", l.UnstyledLog), "\n")
+				logs = append(logs, x)
+			}
+		}
+	}
+
+	return &ci.BuildResult{
+		Success:     results.Results.Result[0].BuildState == "Successful",
+		BuildNumber: fmt.Sprintf("%d", results.Results.Result[0].BuildNumber),
+		IsBuilding:  plan.IsBuilding,
+		LogUrl:      fmt.Sprintf("%s/browse/%s/log", c.bambooClient.BaseUrl, results.Results.Result[0].BuildResultKey),
+		Logs:        logs,
+	}, nil
 }
 
 // GetPlanSuggestions implements ci.Client

@@ -18,6 +18,10 @@ func (c clientImpl) GetPlanSuggestion() (string, error) {
 	return "", nil
 }
 
+func (c clientImpl) LatestBuildResult() (*BuildResult, error) {
+	return nil, nil
+}
+
 func p(_ *context.Context) Client {
 	return clientImpl{}
 }
