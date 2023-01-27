@@ -11,11 +11,17 @@ type ProjectCI struct {
 	ProjectKey string
 }
 
+type ProjectCD struct {
+	Id        string
+	ProjectId int
+}
+
 type Project struct {
 	Identifier string
 	Path       string
 	Git        *ProjectGit
 	CI         *ProjectCI
+	CD         *ProjectCD
 }
 
 // uses the path of the project and the git package

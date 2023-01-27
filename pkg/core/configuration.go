@@ -61,6 +61,19 @@ func (c *Configuration) UpdateProjectCI(identifier string, pci *ProjectCI) error
 	return errors.New("project not found")
 }
 
+func (c *Configuration) UpdateProjectCD(identifier string, pcd *ProjectCD) error {
+	c.dirty = true
+
+	for _, p := range c.Projects {
+		if p.Identifier == identifier {
+			p.CD = pcd
+			return nil
+		}
+	}
+
+	return errors.New("project not found")
+}
+
 // checks the configuration for a project identifier
 // returns true and a pointer to the project, in case
 // a project got found

@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	_ "github.com/svenliebig/work-environment/pkg/cd/clients"
 	_ "github.com/svenliebig/work-environment/pkg/ci/bamboo"
 )
 

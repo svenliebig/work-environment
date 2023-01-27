@@ -22,6 +22,10 @@ func (c clientImpl) LatestBuildResult() (*BuildResult, error) {
 	return nil, nil
 }
 
+func (c clientImpl) GetCD() (int, error) {
+	return 0, nil
+}
+
 func p(_ *context.Context) Client {
 	return clientImpl{}
 }

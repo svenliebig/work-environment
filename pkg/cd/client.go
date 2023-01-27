@@ -1,4 +1,4 @@
-package ci
+package cd
 
 import (
 	"errors"
@@ -8,23 +8,17 @@ import (
 	"github.com/svenliebig/work-environment/pkg/context"
 )
 
-type BranchPlan struct {
-	Key string
-}
-
-type BuildResult struct {
-	Success     bool
-	BuildNumber string
-	Logs        []string
-	IsBuilding  bool
-	LogUrl      string
+type ClientInfo struct {
+	Identifier string
+	Type       string
+	URL        string
+	Version    string
+	ProjectId  int
 }
 
 type Client interface {
-	GetBranchPlans() ([]*BranchPlan, error)
-	GetPlanSuggestion() (string, error)
-	LatestBuildResult() (*BuildResult, error)
-	GetCD() (int, error)
+	Open() error
+	Info() (*ClientInfo, error)
 }
 
 var (

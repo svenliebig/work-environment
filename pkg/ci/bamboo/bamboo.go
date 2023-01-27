@@ -18,6 +18,7 @@ var (
 	ErrRequiredIdentifierCI = errors.New("ci identifier is required when there is more than one CI defined in your work environment")
 	ErrProjectNotFound      = errors.New("cannot find the project in your .work-environment/config.json, make sure it exists")
 	ErrNoSuggestionFound    = errors.New("not able to find any suggestion for the project")
+	ErrNoCDFound            = errors.New("not able to find any CD for the project")
 	ErrNoKeyProvided        = errors.New("no project key for the ci provided, try --suggest or provide a key")
 )
 
@@ -188,6 +189,50 @@ func (c *client) GetPlanSuggestion() (string, error) {
 		}
 
 		return sr.SearchResults[index].Id, nil
+	}
+}
+
+// GetPlanSuggestions implements ci.Client
+func (c *client) GetCD() (int, error) {
+	bc, err := c.bamboo()
+
+	if err != nil {
+		return 0, err
+	}
+
+	p := c.ctx.Project()
+	sr, err := bc.DeployProjectForPlan(p.CI.ProjectKey)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if len(sr) == 0 {
+		return 0, ErrNoCDFound
+	}
+
+	if len(sr) == 1 {
+		return sr[0].Id, nil
+	} else {
+		availabeAnswers := make([]string, len(sr))
+		availableSuggestions := ""
+
+		for i, sr := range sr {
+			availableSuggestions += fmt.Sprintf("\n\t[%d] %d - %s", i, sr.Id, sr.Name)
+			availabeAnswers[i] = fmt.Sprintf("%d", i)
+		}
+
+		q := fmt.Sprintf("\nFound multiple hits for %q in %q:%s\nplease select one:", p.Identifier, "bamboo", availableSuggestions)
+
+		answer := cli.Question(q, availabeAnswers)
+
+		index, err := strconv.Atoi(answer)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return sr[index].Id, nil
 	}
 }
 

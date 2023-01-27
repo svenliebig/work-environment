@@ -23,7 +23,7 @@ func Remove(ctx *context.Context) error {
 		return err
 	}
 
-	config.UpdateProjectCI(p.Identifier, nil)
+	err = config.UpdateProjectCI(p.Identifier, nil)
 
 	if err != nil {
 		return fmt.Errorf("%w: error while trying to update the project ci", err)
