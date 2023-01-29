@@ -2,6 +2,7 @@ package cd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/svenliebig/work-environment/pkg/context"
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
@@ -23,13 +24,13 @@ func Info(ctx *context.Context) error {
 		return err
 	}
 
-	// var buildResult string
+	envs, err := client.Environments()
 
-	// if r.Success {
-	// 	buildResult = cli.Colorize(cli.Green, "Success")
-	// } else {
-	// 	buildResult = cli.Colorize(cli.Red, "Failed")
-	// }
+	if err != nil {
+		return err
+	}
+
+	// var buildResult string
 
 	fmt.Printf("\nConfigured CD for '%s':\n\n", cli.Colorize(cli.Purple, p.Identifier))
 	w := &tablewriter.TableWriter{}
@@ -40,21 +41,31 @@ func Info(ctx *context.Context) error {
 	fmt.Fprintf(w, "  %s: \t%d", "Project Id", info.ProjectId)
 	fmt.Fprintf(w, "")
 	w.Print()
+	w.Flush()
+	fmt.Fprintf(w, "Environments:")
+	fmt.Fprintf(w, "  Name \t Id \t Last Build\t\t Release Name")
 
-	// fmt.Printf("Latest Build (%s): %s\n", r.BuildNumber, buildResult)
-	// if !r.Success {
-	// 	fmt.Printf("Logs: %s\n", r.LogUrl)
-	// 	fmt.Println()
-	// 	for _, l := range r.Logs {
-	// 		fmt.Printf("  > %s\n", l)
-	// 	}
-	// }
-	// if r.IsBuilding {
-	// 	fmt.Println()
-	// 	fmt.Printf("A build is currently %s!\n", cli.Colorize(cli.Blue, "running"))
-	// }
+	// TODO this can be a go routine
+	for _, v := range envs {
+		res, err := client.DeployResult(v.Id)
 
-	// fmt.Println()
+		if err != nil {
+			return err
+		}
+
+		var buildResult string
+		// this belongs into the bamboo client
+		if res.DeploymentState == "SUCCESS" {
+			buildResult = cli.Colorize(cli.Green, "Success")
+		} else {
+			buildResult = cli.Colorize(cli.Red, res.DeploymentState)
+		}
+
+		t := time.Unix(int64(res.Finished/1000), 0)
+		fmt.Fprintf(w, "  %s: \t %d \t %s \t%s \t %s", v.Name, v.Id, buildResult, t.Format(time.RFC822), res.Version)
+	}
+	fmt.Fprintf(w, "")
+	w.Print()
 
 	return nil
 }

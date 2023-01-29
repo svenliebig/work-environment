@@ -65,6 +65,57 @@ func (c *client) Info() (*cd.ClientInfo, error) {
 	}, nil
 }
 
+func (c *client) DeployResult(environmentId int) (*cd.DeployResult, error) {
+	_, err := c.bamboo()
+
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.bambooClient.DeploymentResultsByEnvironmentId(environmentId, 1)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(res.Results) != 1 {
+		return nil, fmt.Errorf("there are no results for the environment with the id %d", environmentId)
+	} else {
+		return &cd.DeployResult{
+			Id:              res.Results[0].Id,
+			Version:         res.Results[0].DeploymentVersionName,
+			DeploymentState: res.Results[0].DeploymentState,
+			Finished:        res.Results[0].FinishedDate,
+		}, nil
+	}
+}
+
+func (c *client) Environments() ([]*cd.Environment, error) {
+	_, err := c.bamboo()
+
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.bambooClient.DeployProjectById(c.ctx.Project().CD.ProjectId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	envs := res.Environments
+	ret := make([]*cd.Environment, len(envs))
+
+	for i, v := range envs {
+		ret[i] = &cd.Environment{
+			Name: v.Name,
+			Id:   v.Id,
+		}
+	}
+
+	return ret, nil
+}
+
 func init() {
 	cd.RegisterClient("bamboo", func(ctx *context.Context) cd.Client {
 		return &client{

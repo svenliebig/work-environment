@@ -16,9 +16,23 @@ type ClientInfo struct {
 	ProjectId  int
 }
 
+type Environment struct {
+	Name string
+	Id   int
+}
+
+type DeployResult struct {
+	Id              int
+	Version         string
+	DeploymentState string
+	Finished        int
+}
+
 type Client interface {
 	Open() error
 	Info() (*ClientInfo, error)
+	Environments() ([]*Environment, error)
+	DeployResult(environmentId int) (*DeployResult, error)
 }
 
 var (

@@ -10,16 +10,20 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/rest"
 )
 
-type DeploymentProjectForPlanResult struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+type DeployProjectByIdResult struct {
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	Environments []struct {
+		Id   int    `json:"id"`
+		Name string `json:"name"`
+	} `json:"environments"`
 }
 
-func (c *Client) GetDeploymentProjectForPlan(planKey string) ([]*DeploymentProjectForPlanResult, error) {
+func (c *Client) DeployProjectById(id int) (*DeployProjectByIdResult, error) {
 	headers := make(map[string]string)
 	headers["Accept"] = "application/json"
 
-	res, err := c.get(context.TODO(), fmt.Sprintf("/deploy/project/forPlan?planKey=%s", planKey), &rest.Options{
+	res, err := c.get(context.TODO(), fmt.Sprintf("/deploy/project/%d", id), &rest.Options{
 		Headers: headers,
 	})
 
@@ -41,7 +45,7 @@ func (c *Client) GetDeploymentProjectForPlan(planKey string) ([]*DeploymentProje
 		return nil, errors.New(string(body))
 	}
 
-	var result []*DeploymentProjectForPlanResult
+	var result *DeployProjectByIdResult
 
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
