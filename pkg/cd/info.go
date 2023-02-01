@@ -2,6 +2,7 @@ package cd
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/svenliebig/work-environment/pkg/context"
@@ -45,25 +46,46 @@ func Info(ctx *context.Context) error {
 	fmt.Fprintf(w, "Environments:")
 	fmt.Fprintf(w, "  Name \t Id \t Last Build\t\t Release Name")
 
-	// TODO this can be a go routine
-	for _, v := range envs {
-		res, err := client.DeployResult(v.Id)
+	var wg sync.WaitGroup
+	max := 3
+	c := make(chan *Environment, max)
 
-		if err != nil {
-			return err
+	go func() {
+		for _, e := range envs {
+			c <- e
 		}
+		close(c)
+	}()
 
-		var buildResult string
-		// this belongs into the bamboo client
-		if res.DeploymentState == "SUCCESS" {
-			buildResult = cli.Colorize(cli.Green, "Success")
-		} else {
-			buildResult = cli.Colorize(cli.Red, res.DeploymentState)
-		}
+	for i := 0; i < max; i++ {
+		wg.Add(1)
 
-		t := time.Unix(int64(res.Finished/1000), 0)
-		fmt.Fprintf(w, "  %s: \t %d \t %s \t%s \t %s", v.Name, v.Id, buildResult, t.Format(time.RFC822), res.Version)
+		go func() {
+			defer wg.Done()
+			for v := range c {
+
+				res, err := client.DeployResult(v.Id)
+
+				if err != nil {
+					fmt.Println("ERROR: cry", err)
+				}
+
+				var buildResult string
+				// this belongs into the bamboo client
+				if res.DeploymentState == "SUCCESS" {
+					buildResult = cli.Colorize(cli.Green, "Success")
+				} else {
+					buildResult = cli.Colorize(cli.Red, res.DeploymentState)
+				}
+
+				// of course... this is not sorted now...
+				t := time.Unix(int64(res.Finished/1000), 0)
+				fmt.Fprintf(w, "  %s: \t %d \t %s \t%s \t %s", v.Name, v.Id, buildResult, t.Format(time.RFC822), res.Version)
+			}
+		}()
 	}
+
+	wg.Wait()
 	fmt.Fprintf(w, "")
 	w.Print()
 
