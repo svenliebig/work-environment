@@ -8,7 +8,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func List(ctx *context.BaseContext) error {
+func List(ctx context.BaseContext) error {
 	config := ctx.Configuration()
 
 	w := &tablewriter.TableWriter{}

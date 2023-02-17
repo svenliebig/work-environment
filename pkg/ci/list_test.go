@@ -9,8 +9,8 @@ import (
 func TestList(t *testing.T) {
 
 	t.Run("should use the tabwriter", func(t *testing.T) {
-		ctx := &context.BaseContext{Cwd: "/Users/sven.liebig/workspace/repositories/isbj/commons/ansible-paas"}
-		err := ctx.Validate()
+		// ctx := &context.BaseContext{Cwd: "/Users/sven.liebig/workspace/repositories/isbj/commons/ansible-paas"}
+		ctx, err := context.CreateBaseContext()
 
 		if err != nil {
 			t.Fatal(err)

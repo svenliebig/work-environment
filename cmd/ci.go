@@ -62,13 +62,12 @@ create a globally available work environment CI.`,
 				log.Fatal(err)
 			}
 
-			p, err := utils.GetPath([]string{})
+			ctx, err := context.CreateBaseContext()
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			ctx := &context.BaseContext{Cwd: p}
 			err = ctx.Validate()
 
 			if err != nil {
@@ -177,10 +176,7 @@ have a CI configured.`,
 		Short: "Lists the available CI environments in your work environment",
 		Long:  `Lists the available CI environments in your work environment`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.BaseContext{
-				Cwd: p,
-			}
+			c, err := context.CreateBaseContext()
 
 			if err != nil {
 				log.Fatal(err)

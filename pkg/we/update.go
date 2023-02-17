@@ -10,7 +10,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func Update(ctx *context.BaseContext) error {
+func Update(ctx context.BaseContext) error {
 	p := ctx.ConfigurationPath()
 	d := filepath.Dir(p)
 

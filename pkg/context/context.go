@@ -14,23 +14,25 @@ var (
 )
 
 var (
-	_ projectContex = &Context{}
+	_ projectContext = &Context{}
 )
 
-type projectContex interface {
-	baseContext
+type projectContext interface {
+	BaseContext
 }
 
+// TODO same as in base.go
 type Context struct {
 	// the cwd path
 	Cwd string
 
-	baseContext *BaseContext
+	baseContext BaseContext
 
 	ciId    string
 	project *core.Project
 }
 
+// TODO rename new project context fn
 func CreateContext() (*Context, error) {
 	p, err := utils.GetPath([]string{})
 	c := &Context{
@@ -51,11 +53,14 @@ func CreateContext() (*Context, error) {
 }
 
 func (c *Context) Validate() error {
-	c.baseContext = &BaseContext{
-		Cwd: c.Cwd,
+	bc, err := CreateBaseContext()
+
+	if err != nil {
+		return err
 	}
 
-	err := c.baseContext.Validate()
+	c.baseContext = bc
+	err = c.baseContext.Validate()
 
 	if err != nil {
 		return err
@@ -120,4 +125,8 @@ func (c *Context) GetCI() (*core.CI, error) {
 	}
 
 	return c.Configuration().GetCIEnvironmentById(p.CI.Id)
+}
+
+func (c *Context) GetProjectsInPath() []*core.Project {
+	return c.baseContext.GetProjectsInPath()
 }

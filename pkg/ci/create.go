@@ -12,7 +12,9 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func Create(ctx *context.BaseContext, url string, ciType string, name string, auth string) error {
+// @Alex so before i had pointer everywhere, no I need to use the interface
+// what are the implifications on the memory and data structure underneath this?
+func Create(ctx context.BaseContext, url string, ciType string, name string, auth string) error {
 	override := false
 	config := ctx.Configuration()
 
