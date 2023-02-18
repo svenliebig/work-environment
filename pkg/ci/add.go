@@ -9,8 +9,7 @@ import (
 )
 
 // TODO suggest could be an extra cmd
-// TODO configurations should be like a context object
-func Add(ctx *context.Context, ciId string, projectId string, key string, suggest bool) error {
+func Add(ctx context.ProjectContext, ciId string, projectId string, key string, suggest bool) error {
 	config := ctx.Configuration()
 	project := ctx.Project()
 

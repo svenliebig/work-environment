@@ -48,7 +48,7 @@ var (
 	ErrBuildResultNotFound = errors.New("was not able to find a build result")
 )
 
-type ClientProvider func(ctx *context.Context) Client
+type ClientProvider func(ctx context.ProjectContext) Client
 
 func RegisterClient(citype string, p ClientProvider) error {
 	lock.Lock()
@@ -63,7 +63,7 @@ func RegisterClient(citype string, p ClientProvider) error {
 	}
 }
 
-func UseClient(ctx *context.Context, citype string) (Client, error) {
+func UseClient(ctx context.ProjectContext, citype string) (Client, error) {
 	lock.RLock()
 	defer lock.RUnlock()
 

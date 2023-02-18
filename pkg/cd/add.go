@@ -10,7 +10,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
 )
 
-func Add(ctx *context.Context) error {
+func Add(ctx context.ProjectContext) error {
 	config := ctx.Configuration()
 	project := ctx.Project()
 	ci_, err := ctx.GetCI()

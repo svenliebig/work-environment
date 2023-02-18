@@ -31,16 +31,13 @@ var (
 	clients = make(map[string]ClientProvider)
 	lock    = sync.RWMutex{}
 
-	// @comm i would like to create a complete new error with that, but
-	// i remember we did not want this last time..
-	// @answ error wrapping
 	ErrClientAlreadyRegistered = errors.New("client already registered")
 	ErrNoSuchClient            = errors.New("no such client")
 
 	ErrBuildResultNotFound = errors.New("was not able to find a build result")
 )
 
-type ClientProvider func(ctx *context.Context) Client
+type ClientProvider func(ctx context.ProjectContext) Client
 
 func RegisterClient(citype string, p ClientProvider) error {
 	lock.Lock()
@@ -55,7 +52,7 @@ func RegisterClient(citype string, p ClientProvider) error {
 	}
 }
 
-func UseClient(ctx *context.Context, citype string) (Client, error) {
+func UseClient(ctx context.ProjectContext, citype string) (Client, error) {
 	lock.RLock()
 	defer lock.RUnlock()
 

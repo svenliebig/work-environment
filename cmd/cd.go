@@ -5,12 +5,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/svenliebig/work-environment/pkg/cd"
 	"github.com/svenliebig/work-environment/pkg/context"
-	"github.com/svenliebig/work-environment/pkg/utils"
 )
 
 // cdCmd represents the cd command
@@ -27,27 +25,20 @@ create a globally available work environment CI.`,
 		Long: `Adds a CD to your project, you have to be inside the project path or specify the
 project identifier. The CD identifier is required, when you have more than one CD specified in yur
 work environment.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			err = cd.Add(c)
-
-			if err != nil {
-				log.Fatal(err)
-			}
+			return cd.Add(c)
 		},
 	}
 	cdOpenCmd = &cobra.Command{
@@ -57,19 +48,16 @@ work environment.`,
 the project path is your current working directory, the project needs to
 have a CD configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			err = cd.Open(c)
@@ -88,19 +76,16 @@ have a CD configured.`,
 the project path is your current working directory, the project needs to
 have a CD configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			err = cd.Info(c)
@@ -114,19 +99,16 @@ have a CD configured.`,
 the project path is your current working directory, the project needs to
 have a CD configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			err = cd.Remove(c)

@@ -23,7 +23,7 @@ var (
 )
 
 type client struct {
-	ctx *context.Context
+	ctx context.ProjectContext
 
 	bambooClient *bamboo.Client
 }
@@ -237,7 +237,7 @@ func (c *client) GetCD() (int, error) {
 }
 
 func init() {
-	ci.RegisterClient("bamboo", func(ctx *context.Context) ci.Client {
+	ci.RegisterClient("bamboo", func(ctx context.ProjectContext) ci.Client {
 		return &client{
 			ctx: ctx,
 		}

@@ -7,7 +7,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
 )
 
-func Remove(ctx *context.Context) error {
+func Remove(ctx context.ProjectContext) error {
 	config := ctx.Configuration()
 	p := ctx.Project()
 

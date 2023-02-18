@@ -7,7 +7,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/browser"
 )
 
-func Open(ctx *context.Context) error {
+func Open(ctx context.ProjectContext) error {
 	p := ctx.Project()
 	c, err := ctx.GetCI()
 

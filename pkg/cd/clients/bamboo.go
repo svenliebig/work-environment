@@ -11,7 +11,7 @@ import (
 )
 
 type client struct {
-	ctx          *context.Context
+	ctx          context.ProjectContext
 	bambooClient *bamboo.Client
 	ci           *core.CI
 }
@@ -117,7 +117,7 @@ func (c *client) Environments() ([]*cd.Environment, error) {
 }
 
 func init() {
-	cd.RegisterClient("bamboo", func(ctx *context.Context) cd.Client {
+	cd.RegisterClient("bamboo", func(ctx context.ProjectContext) cd.Client {
 		return &client{
 			ctx: ctx,
 		}

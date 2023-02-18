@@ -2,6 +2,7 @@ package context
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/svenliebig/work-environment/pkg/core"
@@ -9,33 +10,39 @@ import (
 )
 
 var (
-	ErrNoSuchProjectInDirectory = errors.New("there is no project in the directory")
-	ErrProjectHasNoCI           = errors.New("project has no ci environment defined")
+	ErrNoSuchProjectInDirectory              = errors.New("there is no project in the directory")
+	ErrProjectHasNoCI                        = errors.New("project has no ci environment defined")
+	ErrProjectWithTheGivenIdentifierNotFound = errors.New("project with the given identifier not found")
 )
 
 var (
-	_ projectContext = &Context{}
+	_ ProjectContext = &projectContext{}
 )
 
-type projectContext interface {
+type ProjectContext interface {
 	BaseContext
+
+	Project() *core.Project
+	GetCI() (*core.CI, error)
+	UseCI(id string) error
 }
 
 // TODO same as in base.go
-type Context struct {
+type projectContext struct {
 	// the cwd path
 	Cwd string
 
-	baseContext BaseContext
+	baseContext *baseContext
 
 	ciId    string
 	project *core.Project
 }
 
-// TODO rename new project context fn
-func CreateContext() (*Context, error) {
+// create a ProjectContext out of the cwd and validates
+// if a project and a configuration can be found.
+func CreateProjectContext() (*projectContext, error) {
 	p, err := utils.GetPath([]string{})
-	c := &Context{
+	c := &projectContext{
 		Cwd: p,
 	}
 
@@ -43,7 +50,7 @@ func CreateContext() (*Context, error) {
 		return nil, err
 	}
 
-	err = c.Validate()
+	err = c.validate("")
 
 	if err != nil {
 		return nil, err
@@ -52,29 +59,54 @@ func CreateContext() (*Context, error) {
 	return c, nil
 }
 
-func (c *Context) Validate() error {
+// create a ProjectContext in this cwd and sets the given project name
+// as project in this context, when the name is set, if not the default
+// will take place, and the the fn will search for a project in the cwd
+func CreateProjectContextWithProjectName(name string) (*projectContext, error) {
+	p, err := utils.GetPath([]string{})
+	c := &projectContext{
+		Cwd: p,
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.validate(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func (c *projectContext) validate(name string) error {
 	bc, err := CreateBaseContext()
 
 	if err != nil {
 		return err
 	}
 
-	c.baseContext = bc
-	err = c.baseContext.Validate()
+	c.baseContext = bc.(*baseContext)
+	config := c.baseContext.Configuration()
 
-	if err != nil {
-		return err
+	if name != "" {
+		contains, p := config.ContainsProject(name)
+		if contains {
+			c.project = p
+			return nil
+		} else {
+			return fmt.Errorf("%w: identifier: %s", ErrProjectWithTheGivenIdentifierNotFound, name)
+		}
 	}
 
 	if c.project != nil {
 		return nil
 	}
 
-	config := c.baseContext.Configuration()
-
 	for _, project := range config.Projects {
 		if strings.Contains(c.Cwd, project.Path) {
-			// TODO multiple projects found
 			c.project = project
 			return nil
 		}
@@ -83,25 +115,25 @@ func (c *Context) Validate() error {
 	return ErrNoSuchProjectInDirectory
 }
 
-func (c *Context) Configuration() *core.Configuration {
+func (c *projectContext) Configuration() *core.Configuration {
 	return c.baseContext.Configuration()
 }
 
-func (c *Context) ConfigurationPath() string {
+func (c *projectContext) ConfigurationPath() string {
 	return c.baseContext.ConfigurationPath()
 }
 
-func (c *Context) Close() error {
+func (c *projectContext) Close() error {
 	return c.baseContext.Close()
 }
 
-func (c *Context) Project() *core.Project {
+func (c *projectContext) Project() *core.Project {
 	return c.project
 }
 
 // tell the context to use a ci with a specific id, overrides the default, to take
 // the ci id from the project
-func (c *Context) UseCI(id string) error {
+func (c *projectContext) UseCI(id string) error {
 	config := c.Configuration()
 
 	if _, err := config.GetCIEnvironmentById(id); err != nil {
@@ -113,7 +145,7 @@ func (c *Context) UseCI(id string) error {
 }
 
 // returns the CI for the current project in the cwd.
-func (c *Context) GetCI() (*core.CI, error) {
+func (c *projectContext) GetCI() (*core.CI, error) {
 	if c.ciId != "" {
 		return c.Configuration().GetCIEnvironmentById(c.ciId)
 	}
@@ -127,6 +159,6 @@ func (c *Context) GetCI() (*core.CI, error) {
 	return c.Configuration().GetCIEnvironmentById(p.CI.Id)
 }
 
-func (c *Context) GetProjectsInPath() []*core.Project {
+func (c *projectContext) GetProjectsInPath() []*core.Project {
 	return c.baseContext.GetProjectsInPath()
 }

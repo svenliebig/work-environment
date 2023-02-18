@@ -19,8 +19,6 @@ type BaseContext interface {
 	ConfigurationPath() string
 	Close() error
 	GetProjectsInPath() []*core.Project
-
-	Validate() error
 }
 
 // returns a base context for the work environment validating the most basic
@@ -41,7 +39,7 @@ func CreateBaseContext() (BaseContext, error) {
 		return nil, err
 	}
 
-	err = c.Validate()
+	err = c.validate()
 
 	if err != nil {
 		return nil, err
@@ -61,7 +59,7 @@ type baseContext struct {
 
 // ensures that the context is setup correct, this needs to be used
 // after the initialization of the context
-func (c *baseContext) Validate() error {
+func (c *baseContext) validate() error {
 	if c.configurationPath != "" && c.configuration != nil {
 		return nil
 	}

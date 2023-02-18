@@ -10,7 +10,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func Info(ctx *context.Context) error {
+func Info(ctx context.ProjectContext) error {
 	p := ctx.Project()
 
 	client, err := UseClient(ctx, "bamboo")

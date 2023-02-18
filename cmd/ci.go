@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/svenliebig/work-environment/pkg/ci"
 	"github.com/svenliebig/work-environment/pkg/context"
-	"github.com/svenliebig/work-environment/pkg/utils"
 )
 
 // ciCmd represents the ci command
@@ -68,18 +67,6 @@ create a globally available work environment CI.`,
 				log.Fatal(err)
 			}
 
-			err = ctx.Validate()
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = ctx.Validate()
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
 			err = ci.Create(ctx, u, ciType, name, auth)
 
 			if err != nil {
@@ -106,28 +93,19 @@ work environment.`,
 				log.Fatal(err)
 			}
 
-			project, err := cmd.Flags().GetString("projectIdentifier")
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
 			suggest, err := cmd.Flags().GetBool("suggest")
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
 				log.Fatal(err)
@@ -147,16 +125,13 @@ work environment.`,
 the project path is your current working directory, the project needs to
 have a CI configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
 				log.Fatal(err)
@@ -182,12 +157,6 @@ have a CI configured.`,
 				log.Fatal(err)
 			}
 
-			err = c.Validate()
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
 			err = ci.List(c)
 			return err
 		},
@@ -199,16 +168,13 @@ have a CI configured.`,
 the project path is your current working directory, the project needs to
 have a CI configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
 				log.Fatal(err)
@@ -225,42 +191,13 @@ have a CI configured.`,
 the project path is your current working directory, the project needs to
 have a CI configured.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
+			project, err := cmd.Flags().GetString("project")
 
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
-			err = c.Validate()
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = ci.Remove(c)
-			return err
-		},
-	}
-	resultCmd = &cobra.Command{
-		Use:   "result",
-		Short: "Prints the latest CI build results or the currently running build",
-		Long: `Prints the latest CI build results or the currently running build,
-if the build is currently running. See also 'we ci results' to look at
-a history of build results.`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := utils.GetPath([]string{})
-			c := &context.Context{
-				Cwd: p,
-			}
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			err = c.Validate()
+			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
 				log.Fatal(err)
@@ -270,6 +207,24 @@ a history of build results.`,
 			return err
 		},
 	}
+
+// 	resultCmd = &cobra.Command{
+// 		Use:   "result",
+// 		Short: "Prints the latest CI build results or the currently running build",
+// 		Long: `Prints the latest CI build results or the currently running build,
+// if the build is currently running. See also 'we ci results' to look at
+// a history of build results.`,
+// 		RunE: func(cmd *cobra.Command, args []string) error {
+// 			c, err := context.CreateProjectContext()
+
+// 			if err != nil {
+// 				log.Fatal(err)
+// 			}
+
+//			err = ci.Remove(c)
+//			return err
+//		},
+//	}
 )
 
 func init() {
@@ -280,6 +235,8 @@ func init() {
 	ciCmd.AddCommand(listCmd)
 	ciCmd.AddCommand(infoCmd)
 	ciCmd.AddCommand(removeCmd)
+
+	ciCmd.PersistentFlags().StringP("project", "p", "", "The project where you want to execute your command. It's the current project folder by default.")
 
 	createCmd.Flags().StringP("url", "u", "", "the URL of the CI you want to add\nexample: 'https://bamboo.company.com'")
 	createCmd.Flags().StringP("type", "t", "", "the CI type, currently available types are 'bamboo'\nexample: 'bamboo'")
@@ -292,7 +249,6 @@ func init() {
 	createCmd.MarkFlagRequired("name")
 
 	addCmd.Flags().StringP("ciIdentifier", "c", "", "the identifier of the ci\nexample: 'my-bamboo'")
-	addCmd.Flags().StringP("projectIdentifier", "p", "", "the identifier of the project\nexample: 'my-project'")
 	addCmd.Flags().BoolP("suggest", "s", false, "if set, you will get suggestions of bamboo project keys")
 	addCmd.Flags().StringP("key", "b", "", "the key identifier for the project in the ci, not relevant if suggest is set\nexmaple: 'PRS-SZ'")
 
