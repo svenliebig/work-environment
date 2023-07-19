@@ -123,4 +123,6 @@ func init() {
 	cdCmd.AddCommand(cdOpenCmd)
 	cdCmd.AddCommand(cdRemoveCmd)
 	cdCmd.AddCommand(cdInfoCmd)
+
+	cdCmd.PersistentFlags().StringP("project", "p", "", "The project where you want to execute your command. It's the current project folder by default.")
 }
