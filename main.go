@@ -1,7 +1,6 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-*/
+ *Copyright © 2022 Sven Liebig <liebigsv@gmail.com>
+ */
 package main
 
 import "github.com/svenliebig/work-environment/cmd"
