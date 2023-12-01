@@ -174,13 +174,21 @@ have a CI configured.`,
 				log.Fatal(err)
 			}
 
+			url, err := cmd.Flags().GetBool("url")
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = ci.Info(c)
+			err = ci.Info(c, &ci.InfoOptions{
+				Url: url,
+			})
 			return err
 		},
 	}
@@ -251,6 +259,8 @@ func init() {
 	addCmd.Flags().StringP("ciIdentifier", "c", "", "the identifier of the ci\nexample: 'my-bamboo'")
 	addCmd.Flags().BoolP("suggest", "s", false, "if set, you will get suggestions of bamboo project keys")
 	addCmd.Flags().StringP("key", "b", "", "the key identifier for the project in the ci, not relevant if suggest is set\nexmaple: 'PRS-SZ'")
+
+	infoCmd.Flags().BoolP("url", "u", false, "prints the url of the ci")
 
 	// addCmd÷MarkFlagsMutuallyExclusive("suggest", "bambooKey")
 }

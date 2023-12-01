@@ -45,6 +45,56 @@ func (c *client) bamboo() (*bamboo.Client, error) {
 	return c.bambooClient, nil
 }
 
+// returns the main branch plan ci url
+func (c *client) GetPlanUrl() (string, error) {
+	bc, err := c.bamboo()
+
+	if err != nil {
+		return "", err
+	}
+
+	p := c.ctx.Project()
+
+	if err != nil {
+		return "", err
+	}
+
+	key := p.CI.ProjectKey
+
+	return fmt.Sprintf("%s/browse/%s", bc.BaseUrl, key), nil
+}
+
+// returns the ci url of the current branch, or the main branch plan if none is found
+func (c *client) GetBranchPlanUrl() (string, error) {
+	bc, err := c.bamboo()
+
+	if err != nil {
+		return "", err
+	}
+
+	p := c.ctx.Project()
+
+	if err != nil {
+		return "", err
+	}
+
+	var key string
+
+	branchPlans, err := c.GetBranchPlans()
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(branchPlans) == 1 {
+		key = branchPlans[0].Key
+	} else {
+		key = p.CI.ProjectKey
+	}
+
+	return fmt.Sprintf("%s/browse/%s", bc.BaseUrl, key), nil
+}
+
 // GetBranchPlans implements ci.Client
 func (c *client) GetBranchPlans() ([]*ci.BranchPlan, error) {
 	bc, err := c.bamboo()

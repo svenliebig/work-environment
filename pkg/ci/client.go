@@ -25,6 +25,8 @@ type Client interface {
 	GetPlanSuggestion() (string, error)
 	LatestBuildResult() (*BuildResult, error)
 	GetCD() (int, error)
+	GetPlanUrl() (string, error)
+	GetBranchPlanUrl() (string, error)
 }
 
 var (

@@ -22,21 +22,13 @@ func Open(ctx context.ProjectContext) error {
 			return fmt.Errorf("error while trying to use client: %w", err)
 		}
 
-		plans, err := client.GetBranchPlans()
+		url, err := client.GetBranchPlanUrl()
 
 		if err != nil {
 			return fmt.Errorf("%w: error while searching for branch plans", err)
 		}
 
-		if len(plans) == 0 {
-			url := fmt.Sprintf("%s/browse/%s", c.Url, p.CI.ProjectKey)
-			err = browser.Open(url)
-		} else if len(plans) == 1 {
-			url := fmt.Sprintf("%s/browse/%s", c.Url, plans[0].Key)
-			err = browser.Open(url)
-		} else {
-			return fmt.Errorf("found more branch plans, but selecting one is not supported")
-		}
+		err = browser.Open(url)
 
 		if err != nil {
 			return err
