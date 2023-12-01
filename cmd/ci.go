@@ -260,7 +260,7 @@ func init() {
 	addCmd.Flags().BoolP("suggest", "s", false, "if set, you will get suggestions of bamboo project keys")
 	addCmd.Flags().StringP("key", "b", "", "the key identifier for the project in the ci, not relevant if suggest is set\nexmaple: 'PRS-SZ'")
 
-	infoCmd.Flags().BoolP("url", "u", false, "prints the url of the ci")
+	infoCmd.Flags().BoolP("url", "u", false, "Prints the URL of the CI environment")
 
 	// addCmd÷MarkFlagsMutuallyExclusive("suggest", "bambooKey")
 }

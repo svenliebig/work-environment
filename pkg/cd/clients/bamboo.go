@@ -46,7 +46,13 @@ func (c *client) Open() error {
 		return err
 	}
 
-	return browser.Open(fmt.Sprintf("%s/deploy/viewDeploymentProjectEnvironments.action?id=%d", c.bambooClient.BaseUrl, c.ctx.Project().CD.ProjectId))
+	url, err := c.GetPlanUrl()
+
+	if err != nil {
+		return err
+	}
+
+	return browser.Open(url)
 }
 
 func (c *client) Info() (*cd.ClientInfo, error) {
@@ -88,6 +94,16 @@ func (c *client) DeployResult(environmentId int) (*cd.DeployResult, error) {
 			Finished:        res.Results[0].FinishedDate,
 		}, nil
 	}
+}
+
+func (c *client) GetPlanUrl() (string, error) {
+	_, err := c.bamboo()
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/deploy/viewDeploymentProjectEnvironments.action?id=%d", c.bambooClient.BaseUrl, c.ctx.Project().CD.ProjectId), nil
 }
 
 func (c *client) Environments() ([]*cd.Environment, error) {

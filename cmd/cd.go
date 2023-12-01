@@ -82,13 +82,21 @@ have a CD configured.`,
 				return err
 			}
 
+			url, err := cmd.Flags().GetBool("url")
+
+			if err != nil {
+				return err
+			}
+
 			c, err := context.CreateProjectContextWithProjectName(project)
 
 			if err != nil {
 				return err
 			}
 
-			err = cd.Info(c)
+			err = cd.Info(c, &cd.InfoOptions{
+				Url: url,
+			})
 			return err
 		},
 	}
@@ -125,4 +133,6 @@ func init() {
 	cdCmd.AddCommand(cdInfoCmd)
 
 	cdCmd.PersistentFlags().StringP("project", "p", "", "The project where you want to execute your command. It's the current project folder by default.")
+
+	cdInfoCmd.Flags().BoolP("url", "u", false, "Prints the URL of the CD environment")
 }

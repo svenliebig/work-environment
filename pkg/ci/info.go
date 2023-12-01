@@ -9,7 +9,12 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
-func Info(ctx context.ProjectContext) error {
+type InfoOptions struct {
+	// prints only the url of the plan if true
+	Url bool
+}
+
+func Info(ctx context.ProjectContext, options *InfoOptions) error {
 	p := ctx.Project()
 	ci, err := ctx.GetCI()
 
@@ -25,6 +30,17 @@ func Info(ctx context.ProjectContext) error {
 
 	if err != nil {
 		return err
+	}
+
+	if options.Url {
+		url, err := client.GetBranchPlanUrl()
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(url)
+		return nil
 	}
 
 	r, err := client.LatestBuildResult()
