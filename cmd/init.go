@@ -84,6 +84,27 @@ and adding projects that are new.`,
 			}
 		},
 	}
+	useCmd = &cobra.Command{
+		Use:   "use",
+		Short: "Uses a work environment configuration to clone projects",
+		Long: `Uses a work environment configuration to clone projects that are
+defined in the there. This command should be used to redownload an
+work environment after a work environment was created with 'we ci init'.`,
+		Args: cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			ctx, err := context.CreateBaseContext()
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = we.Use(ctx)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
 )
 
 func init() {
@@ -91,6 +112,7 @@ func init() {
 	initCmd.Flags().BoolP("override", "o", false, "will override an existing work-environment configuration")
 
 	rootCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(useCmd)
 
 	rootCmd.AddCommand(weListCmd)
 	weListCmd.Flags().BoolP("all", "a", false, "will list all projects instead of only the ones in the current path (no implemented yet)")

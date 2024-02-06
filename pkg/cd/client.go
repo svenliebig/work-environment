@@ -33,6 +33,7 @@ type Client interface {
 	Info() (*ClientInfo, error)
 	Environments() ([]*Environment, error)
 	DeployResult(environmentId int) (*DeployResult, error)
+	GetPlanUrl() (string, error)
 }
 
 var (
