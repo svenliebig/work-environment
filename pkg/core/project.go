@@ -16,12 +16,18 @@ type ProjectCD struct {
 	ProjectId int
 }
 
+type ProjectVCS struct {
+	Id            string
+	Configuration string
+}
+
 type Project struct {
 	Identifier string
 	Path       string
 	Git        *ProjectGit
 	CI         *ProjectCI
 	CD         *ProjectCD
+	VCS        *ProjectVCS
 }
 
 // uses the path of the project and the git package

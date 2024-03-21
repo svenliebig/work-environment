@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 Sven Liebig <liebigsv@gmail.com>
+Copyright © 2024 Sven Liebig
 */
 package cmd
 

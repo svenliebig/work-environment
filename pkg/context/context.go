@@ -12,6 +12,7 @@ import (
 var (
 	ErrNoSuchProjectInDirectory              = errors.New("there is no project in the directory")
 	ErrProjectHasNoCI                        = errors.New("project has no ci environment defined")
+	ErrProjectHasNoVCS                       = errors.New("project has no vcs environment defined")
 	ErrProjectWithTheGivenIdentifierNotFound = errors.New("project with the given identifier not found")
 )
 
@@ -25,6 +26,9 @@ type ProjectContext interface {
 	Project() *core.Project
 	GetCI() (*core.CI, error)
 	UseCI(id string) error
+
+	GetVCS() (*core.VCS, error)
+	UpdateVCS(vcs *core.VCS, configuration string) error
 }
 
 // TODO same as in base.go
@@ -159,6 +163,27 @@ func (c *projectContext) GetCI() (*core.CI, error) {
 	return c.Configuration().GetCIEnvironmentById(p.CI.Id)
 }
 
+func (c *projectContext) GetVCS() (*core.VCS, error) {
+	p := c.Project()
+
+	if p.VCS == nil {
+		return nil, ErrProjectHasNoVCS
+	}
+
+	return c.Configuration().GetVCSEnvironmentById(p.VCS.Id)
+}
+
 func (c *projectContext) GetProjectsInPath() []*core.Project {
 	return c.baseContext.GetProjectsInPath()
+}
+
+func (c *projectContext) UpdateVCS(vcs *core.VCS, configuration string) error {
+	if vcs == nil {
+		return c.Configuration().UpdateProjectVCS(c.Project().Identifier, nil)
+	}
+
+	return c.Configuration().UpdateProjectVCS(c.Project().Identifier, &core.ProjectVCS{
+		Id:            vcs.Identifier,
+		Configuration: configuration,
+	})
 }

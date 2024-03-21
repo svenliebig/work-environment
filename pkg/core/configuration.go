@@ -5,15 +5,17 @@ import (
 )
 
 var (
-	ErrCIAlreadyExists = errors.New("a ci with that identifier does already exists")
-	ErrNoSuchCI        = errors.New("there is no ci with that identifier available")
+	ErrCIAlreadyExists  = errors.New("a ci with that identifier does already exists")
+	ErrVCSAlreadyExists = errors.New("a vcs with that identifier does already exists")
+	ErrNoSuchCI         = errors.New("there is no ci with that identifier available")
 )
 
 const ConfigurationFileName = ".work-environment.json"
 
 type Configuration struct {
-	Projects       []*Project
-	CIEnvironments []*CI
+	Projects        []*Project
+	CIEnvironments  []*CI
+	VCSEnvironments []*VCS
 
 	// tells if the configuration has been modified since
 	// the last reading or writing from the configuration file
@@ -35,6 +37,24 @@ func (c *Configuration) GetCIEnvironmentById(identifier string) (*CI, error) {
 			}
 		}
 		return nil, errors.New("no such ci environment with the given identifier")
+	}
+}
+
+func (c *Configuration) GetVCSEnvironmentById(identifier string) (*VCS, error) {
+	if len(c.VCSEnvironments) == 0 {
+		return nil, errors.New("no vcs environments defined")
+	} else {
+		if identifier == "" {
+			return nil, errors.New("parameter identifier is empty, but required when there are more then one vcs environment")
+		}
+
+		for _, e := range c.VCSEnvironments {
+			if e.Identifier == identifier {
+				return e, nil
+			}
+		}
+
+		return nil, errors.New("no such vcs environment with the given identifier")
 	}
 }
 
@@ -74,6 +94,19 @@ func (c *Configuration) UpdateProjectCD(identifier string, pcd *ProjectCD) error
 	return errors.New("project not found")
 }
 
+func (c *Configuration) UpdateProjectVCS(identifier string, pvcs *ProjectVCS) error {
+	c.dirty = true
+
+	for _, p := range c.Projects {
+		if p.Identifier == identifier {
+			p.VCS = pvcs
+			return nil
+		}
+	}
+
+	return errors.New("project not found")
+}
+
 // checks the configuration for a project identifier
 // returns true and a pointer to the project, in case
 // a project got found
@@ -106,6 +139,24 @@ func (c *Configuration) RemoveProject(p *Project) error {
 		}
 	}
 	return errors.New("project not found")
+}
+
+func (c *Configuration) AddVCS(vcs *VCS) error {
+	c.dirty = true
+
+	if c.VCSEnvironments == nil {
+		c.VCSEnvironments = []*VCS{vcs}
+	} else {
+		for _, e := range c.VCSEnvironments {
+			if e.Identifier == vcs.Identifier {
+				return ErrVCSAlreadyExists
+			}
+		}
+
+		c.VCSEnvironments = append(c.VCSEnvironments, vcs)
+	}
+
+	return nil
 }
 
 func (c *Configuration) AddCI(ci *CI) error {
