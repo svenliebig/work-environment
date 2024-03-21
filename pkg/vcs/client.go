@@ -21,6 +21,7 @@ var (
 type Client interface {
 	Configure() (string, error)
 	List() ([]string, error)
+	WebURL() (string, error)
 }
 
 type ClientFactory func(ctx context.ProjectContext) Client

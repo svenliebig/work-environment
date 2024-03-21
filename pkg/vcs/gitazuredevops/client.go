@@ -132,6 +132,18 @@ func (c *client) Configure() (string, error) {
 	return "", vcs.ErrRepositoryNotFound
 }
 
+func (c *client) WebURL() (string, error) {
+	str := c.ctx.Project().VCS.Configuration
+
+	var configuration configuration
+
+	if err := json.Unmarshal([]byte(str), &configuration); err != nil {
+		return "", err
+	}
+
+	return configuration.WebURL, nil
+}
+
 func (c *client) List() ([]string, error) {
 	fmt.Println("List")
 

@@ -45,6 +45,23 @@ var (
 			}
 		},
 	}
+	vcsOpen = &cobra.Command{
+		Use:   "open",
+		Short: "Opens the repository in the browser",
+		Run: func(cmd *cobra.Command, args []string) {
+			ctx, err := context.CreateProjectContextWithProjectName(cmd.Flag("project").Value.String())
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = vcs.Open(ctx)
+
+			if err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
 	vcsInfo = &cobra.Command{
 		Use:   "info",
 		Short: "Shows information about the vcs",
@@ -104,6 +121,7 @@ func init() {
 	vcsCmd.AddCommand(vcsInfo)
 	vcsCmd.AddCommand(vcsAdd)
 	vcsCmd.AddCommand(vcsRemove)
+	vcsCmd.AddCommand(vcsOpen)
 
 	vcsCmd.PersistentFlags().StringP("project", "p", "", "The project where you want to execute your command. It's the current project folder by default.")
 
