@@ -109,11 +109,23 @@ func (c *projectContext) validate(name string) error {
 		return nil
 	}
 
+	var found *core.Project
 	for _, project := range config.Projects {
 		if strings.Contains(c.Cwd, project.Path) {
-			c.project = project
-			return nil
+			if found == nil {
+				found = project
+				continue
+			}
+
+			if len(project.Path) > len(found.Path) {
+				found = project
+			}
 		}
+	}
+
+	if found != nil {
+		c.project = found
+		return nil
 	}
 
 	return ErrNoSuchProjectInDirectory

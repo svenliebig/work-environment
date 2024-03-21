@@ -8,6 +8,7 @@ import (
 )
 
 func Add(ctx context.ProjectContext) error {
+	// TODO this needs to be fixed
 	vcse, err := ctx.Configuration().GetVCSEnvironmentById("azure-tp6")
 
 	if err != nil {
