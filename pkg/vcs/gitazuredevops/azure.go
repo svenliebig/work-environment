@@ -2,26 +2,27 @@ package gitazuredevops
 
 import (
 	goctx "context"
+	"fmt"
 
 	"github.com/microsoft/azure-devops-go-api/azuredevops/v7"
 	azcore "github.com/microsoft/azure-devops-go-api/azuredevops/v7/core"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/v7/git"
 )
 
-func (c *client) conn() (*azuredevops.Connection, error) {
-	if c.connection != nil {
-		return c.connection, nil
+func (c *client) connection() (*azuredevops.Connection, error) {
+	if c._connection != nil {
+		return c._connection, nil
 	}
 
-	vcs, err := c.ctx.GetVCS()
+	env, err := c.environment()
 
 	if err != nil {
 		return nil, err
 	}
 
-	c.connection = azuredevops.NewPatConnection(vcs.Url, vcs.AccessToken)
+	c._connection = azuredevops.NewPatConnection(fmt.Sprintf("https://dev.azure.com/%s", env.Organization), env.AccessToken)
 
-	return c.connection, nil
+	return c._connection, nil
 }
 
 func (c *client) coreClient() (azcore.Client, error) {
@@ -29,7 +30,7 @@ func (c *client) coreClient() (azcore.Client, error) {
 		return c._coreClient, nil
 	}
 
-	connection, err := c.conn()
+	connection, err := c.connection()
 
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func (c *client) gitClient() (git.Client, error) {
 		return c._gitClient, nil
 	}
 
-	connection, err := c.conn()
+	connection, err := c.connection()
 
 	if err != nil {
 		return nil, err

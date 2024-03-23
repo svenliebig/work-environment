@@ -32,10 +32,8 @@ var (
 			}
 
 			err = vcs.Create(ctx, vcs.CreateParameter{
-				Type:        cmd.Flag("type").Value.String(),
-				Identifier:  cmd.Flag("identifier").Value.String(),
-				AccessToken: cmd.Flag("access-token").Value.String(),
-				Url:         cmd.Flag("url").Value.String(),
+				Type:       cmd.Flag("type").Value.String(),
+				Identifier: cmd.Flag("identifier").Value.String(),
 			})
 
 			if err != nil {
@@ -127,13 +125,9 @@ func init() {
 
 	vcsCreate.Flags().StringP("type", "t", "", fmt.Sprintf("The type of the vcs. Can be one of: '%s'", strings.Join(vcs.AvailableClients(), "', '")))
 	vcsCreate.Flags().StringP("identifier", "i", "", "The identifier of the vcs.")
-	vcsCreate.Flags().StringP("access-token", "a", "", "The access token of the vcs.")
-	vcsCreate.Flags().StringP("url", "u", "", "The url of the vcs. For example https://dev.azure.com/{organization}/{project}")
 
 	vcsCreate.MarkFlagRequired("type")
 	vcsCreate.MarkFlagRequired("identifier")
-	vcsCreate.MarkFlagRequired("access-token")
-	vcsCreate.MarkFlagRequired("url")
 
 	vcsOpen.Flags().BoolP("pull-request", "r", false, "Opens the pull request page instead of the repository page.")
 }

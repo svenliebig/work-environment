@@ -3,9 +3,12 @@ package cli
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/manifoldco/promptui"
 )
 
 func QuestionFree(q string) string {
@@ -20,6 +23,21 @@ func QuestionFree(q string) string {
 
 	i = strings.TrimSuffix(i, "\n")
 	return i
+}
+
+func Select(q string, options []string) string {
+	prompt := promptui.Select{
+		Label: q,
+		Items: options,
+	}
+
+	_, result, err := prompt.Run()
+
+	if err != nil {
+		log.Fatalf("Prompt failed %v\n", err)
+	}
+
+	return result
 }
 
 func Question(q string, allowedAnswers []string) string {

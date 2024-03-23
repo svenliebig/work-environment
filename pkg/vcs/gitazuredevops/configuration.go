@@ -10,15 +10,15 @@ import (
 	"github.com/svenliebig/work-environment/pkg/vcs"
 )
 
-type configuration struct {
+type projectConfiguration struct {
 	Project string
 	WebURL  string
 }
 
-func (c *client) configuration() (*configuration, error) {
+func (c *client) configuration() (*projectConfiguration, error) {
 	str := c.ctx.Project().VCS.Configuration
 
-	var configuration configuration
+	var configuration projectConfiguration
 
 	if err := json.Unmarshal([]byte(str), &configuration); err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (c *client) Configure() (string, error) {
 			if *repository.Name == p.Identifier {
 				fmt.Println("Repository found.")
 
-				result, err := json.Marshal(configuration{
+				result, err := json.Marshal(projectConfiguration{
 					Project: *project.Name,
 					WebURL:  *repository.WebUrl,
 				})

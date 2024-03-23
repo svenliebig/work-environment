@@ -9,7 +9,15 @@ import (
 
 func Add(ctx context.ProjectContext) error {
 	// TODO this needs to be fixed
-	vcse, err := ctx.Configuration().GetVCSEnvironmentById("azure-tp6")
+	c := ctx.Configuration()
+
+	options := make([]string, 0, len(c.VCSEnvironments))
+	for _, v := range c.VCSEnvironments {
+		options = append(options, v.Identifier)
+	}
+	env := cli.Select("Select the VCS environment to add", options)
+
+	vcse, err := c.GetVCSEnvironmentById(env)
 
 	if err != nil {
 		return err
@@ -21,7 +29,7 @@ func Add(ctx context.ProjectContext) error {
 		return err
 	}
 
-	client, err := UseClient(ctx, vcse.Type)
+	client, err := UseClient(ctx, vcse)
 
 	if err != nil {
 		return err

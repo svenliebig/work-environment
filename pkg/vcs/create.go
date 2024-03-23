@@ -3,7 +3,6 @@ package vcs
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/svenliebig/work-environment/pkg/context"
 	"github.com/svenliebig/work-environment/pkg/core"
@@ -16,25 +15,16 @@ type CreateParameter = core.VCS
 func Create(ctx context.BaseContext, p CreateParameter) error {
 	config := ctx.Configuration()
 
-	// client := &bamboo.Client{
-	// 	BaseUrl:   url,
-	// 	AuthToken: auth,
-	// }
-	//
-	// version, err := client.GetInfo(gocontext.Background())
+	vcsEnvironment, err := SetupClient(ctx, core.VCS{
+		Type:       p.Type,
+		Identifier: p.Identifier,
+	})
 
-	// if err != nil {
-	// 	return err
-	// }
-
-	vcsEnvironment := &core.VCS{
-		Type:        p.Type,
-		Identifier:  p.Identifier,
-		AccessToken: p.AccessToken,
-		Url:         p.Url,
+	if err != nil {
+		return err
 	}
 
-	err := config.AddVCS(vcsEnvironment)
+	err = config.AddVCS(&vcsEnvironment)
 
 	if errors.Is(err, core.ErrVCSAlreadyExists) {
 		q := fmt.Sprintf("\nThe Identifier '%s' is already declared in your configuration.\nDo you want to overwrite it? [y/n] ", cli.Colorize(cli.Purple, p.Identifier))
@@ -60,9 +50,7 @@ func Create(ctx context.BaseContext, p CreateParameter) error {
 	w := &tablewriter.TableWriter{}
 	fmt.Fprintf(w, "  Identifier: \t%s", vcsEnvironment.Identifier)
 	fmt.Fprintf(w, "  Type: \t%s", vcsEnvironment.Type)
-	fmt.Fprintf(w, "  URL: \t%s", vcsEnvironment.Url)
-	// fmt.Fprintf(w, "  Version: \t%s", version.Version)
-	fmt.Fprintf(w, "  Token: \t%s", strings.Repeat("*", len(vcsEnvironment.AccessToken)))
+	fmt.Fprintf(w, "  Type: \t%s", vcsEnvironment.Configuration)
 	w.Print()
 	fmt.Println()
 

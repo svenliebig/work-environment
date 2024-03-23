@@ -14,10 +14,13 @@ import (
 
 type client struct {
 	ctx         context.ProjectContext
-	connection  *azuredevops.Connection
+	_connection *azuredevops.Connection
+	_env        *envConfig
 	_coreClient azcore.Client
 	_gitClient  git.Client
 }
+
+const identifier = "gitazuredevops"
 
 func (c *client) PullRequestWebURL() (string, error) {
 	config, err := c.configuration()
@@ -77,7 +80,7 @@ func (c *client) Info() error {
 }
 
 func init() {
-	vcs.RegisterClient("gitazuredevops", func(ctx context.ProjectContext) vcs.Client {
+	vcs.RegisterClient(identifier, func(ctx context.ProjectContext) vcs.Client {
 		return &client{
 			ctx: ctx,
 		}

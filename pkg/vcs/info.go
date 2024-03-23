@@ -12,7 +12,7 @@ func Info(ctx context.ProjectContext) error {
 		return err
 	}
 
-	client, err := UseClient(ctx, vcse.Type)
+	client, err := UseClient(ctx, vcse)
 
 	if err != nil {
 		return err

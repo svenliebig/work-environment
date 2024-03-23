@@ -19,7 +19,7 @@ func Open(ctx context.ProjectContext, params OpenParameters) error {
 		return err
 	}
 
-	client, err := UseClient(ctx, vcs.Type)
+	client, err := UseClient(ctx, vcs)
 
 	if err != nil {
 		return err
