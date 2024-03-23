@@ -35,3 +35,8 @@ type Project struct {
 func (p *Project) GetBranchName() (string, error) {
 	return git.BranchName(p.Path)
 }
+
+// uses the path of the project and the git package
+func (p *Project) GetDefaultBranchName() (string, error) {
+	return git.DefaultBranchName(p.Path)
+}

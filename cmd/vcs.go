@@ -55,7 +55,9 @@ var (
 				log.Fatal(err)
 			}
 
-			err = vcs.Open(ctx)
+			err = vcs.Open(ctx, vcs.OpenParameters{
+				PullRequest: cmd.Flag("pull-request").Value.String() == "true",
+			})
 
 			if err != nil {
 				log.Fatal(err)
@@ -134,4 +136,6 @@ func init() {
 	vcsCreate.MarkFlagRequired("identifier")
 	vcsCreate.MarkFlagRequired("access-token")
 	vcsCreate.MarkFlagRequired("url")
+
+	vcsOpen.Flags().BoolP("pull-request", "r", false, "Opens the pull request page instead of the repository page.")
 }

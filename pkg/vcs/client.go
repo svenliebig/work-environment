@@ -19,9 +19,19 @@ var (
 )
 
 type Client interface {
+	// is called immediately after the client is attached to the project context
+	// and is used to configure the client with the necessary information, the
+	// returned value is saved on the property configuration of the context.
 	Configure() (string, error)
-	List() ([]string, error)
+
+	// prints information about the repository.
+	Info() error
+
+	// returns the web URL of the repository.
 	WebURL() (string, error)
+
+	// returns the web URL of the pull request.
+	PullRequestWebURL() (string, error)
 }
 
 type ClientFactory func(ctx context.ProjectContext) Client

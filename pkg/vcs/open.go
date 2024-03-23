@@ -1,11 +1,18 @@
 package vcs
 
 import (
+	"fmt"
+
 	"github.com/svenliebig/work-environment/pkg/context"
 	"github.com/svenliebig/work-environment/pkg/utils/browser"
 )
 
-func Open(ctx context.ProjectContext) error {
+type OpenParameters struct {
+	// opens the pull request page instead of the repository page
+	PullRequest bool
+}
+
+func Open(ctx context.ProjectContext, params OpenParameters) error {
 	vcs, err := ctx.GetVCS()
 
 	if err != nil {
@@ -18,7 +25,14 @@ func Open(ctx context.ProjectContext) error {
 		return err
 	}
 
-	url, err := client.WebURL()
+	var url string
+	if params.PullRequest {
+		url, err = client.PullRequestWebURL()
+	} else {
+		url, err = client.WebURL()
+	}
+
+	fmt.Println(url)
 
 	if err != nil {
 		return err

@@ -2,7 +2,6 @@ package gitazuredevops
 
 import (
 	goctx "context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/svenliebig/work-environment/pkg/context"
@@ -20,137 +19,44 @@ type client struct {
 	_gitClient  git.Client
 }
 
-type configuration struct {
-	Project string
-	WebURL  string
-}
-
-func (c *client) conn() (*azuredevops.Connection, error) {
-	if c.connection != nil {
-		return c.connection, nil
-	}
-
-	vcs, err := c.ctx.GetVCS()
-
-	if err != nil {
-		return nil, err
-	}
-
-	c.connection = azuredevops.NewPatConnection(vcs.Url, vcs.AccessToken)
-
-	return c.connection, nil
-}
-
-func (c *client) coreClient() (azcore.Client, error) {
-	if c._coreClient != nil {
-		return c._coreClient, nil
-	}
-
-	connection, err := c.conn()
-
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := azcore.NewClient(goctx.Background(), connection)
-
-	if err != nil {
-		return nil, err
-	}
-
-	c._coreClient = client
-
-	return c._coreClient, nil
-}
-
-func (c *client) gitClient() (git.Client, error) {
-	if c._gitClient != nil {
-		return c._gitClient, nil
-	}
-
-	connection, err := c.conn()
-
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := git.NewClient(goctx.Background(), connection)
-
-	if err != nil {
-		return nil, err
-	}
-
-	c._gitClient = client
-
-	return c._gitClient, nil
-}
-
-func (c *client) Configure() (string, error) {
-	p := c.ctx.Project()
-	fmt.Printf("Configure '%s' for project '%s'...\n", p.VCS.Id, p.Identifier)
-
-	coreClient, err := c.coreClient()
-	gitClient, err := c.gitClient()
+func (c *client) PullRequestWebURL() (string, error) {
+	config, err := c.configuration()
 
 	if err != nil {
 		return "", err
 	}
 
-	projects, err := coreClient.GetProjects(goctx.Background(), azcore.GetProjectsArgs{})
+	project := c.ctx.Project()
+	branch, err := project.GetBranchName()
 
 	if err != nil {
 		return "", err
 	}
 
-	for _, project := range projects.Value {
-		repositories, err := gitClient.GetRepositories(goctx.Background(), git.GetRepositoriesArgs{
-			Project: project.Name,
-		})
+	defaultBranch, err := project.GetDefaultBranchName()
 
-		if err != nil {
-			return "", err
-		}
+	fmt.Println(defaultBranch)
 
-		for _, repository := range *repositories {
-			if *repository.Name == p.Identifier {
-				fmt.Println("Repository found.")
-
-				result, err := json.Marshal(configuration{
-					Project: *project.Name,
-					WebURL:  *repository.WebUrl,
-				})
-
-				if err != nil {
-					return "", err
-				}
-
-				return string(result), nil
-			}
-		}
-	}
-
-	return "", vcs.ErrRepositoryNotFound
+	return fmt.Sprintf("%s/pullrequestcreate?sourceRef=%s&targetRef=%s", config.WebURL, branch, defaultBranch), nil
 }
 
 func (c *client) WebURL() (string, error) {
-	str := c.ctx.Project().VCS.Configuration
+	config, err := c.configuration()
 
-	var configuration configuration
-
-	if err := json.Unmarshal([]byte(str), &configuration); err != nil {
+	if err != nil {
 		return "", err
 	}
 
-	return configuration.WebURL, nil
+	return config.WebURL, nil
 }
 
-func (c *client) List() ([]string, error) {
+func (c *client) Info() error {
 	fmt.Println("List")
 
 	client, err := c.gitClient()
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	var bla = "tp7"
@@ -160,14 +66,14 @@ func (c *client) List() ([]string, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, repository := range *repositories {
 		fmt.Println(*repository.Name)
 	}
 
-	return nil, nil
+	return nil
 }
 
 func init() {

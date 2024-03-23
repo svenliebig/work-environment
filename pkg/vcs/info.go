@@ -18,11 +18,5 @@ func Info(ctx context.ProjectContext) error {
 		return err
 	}
 
-	_, err = client.List()
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return client.Info()
 }
