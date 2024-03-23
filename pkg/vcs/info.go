@@ -3,10 +3,7 @@ package vcs
 import "github.com/svenliebig/work-environment/pkg/context"
 
 func Info(ctx context.ProjectContext) error {
-	p := ctx.Project()
-
-	println(p.Identifier)
-	vcse, err := ctx.Configuration().GetVCSEnvironmentById("azure-tp6")
+	vcse, err := ctx.GetVCS()
 
 	if err != nil {
 		return err

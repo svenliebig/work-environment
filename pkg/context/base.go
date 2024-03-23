@@ -2,12 +2,14 @@ package context
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils"
+	"github.com/svenliebig/work-environment/pkg/utils/cli"
 	"github.com/svenliebig/work-environment/pkg/utils/configwriter"
 )
 
@@ -134,7 +136,7 @@ func (c *baseContext) Info() *configwriter.ConfigWriter {
 	}
 
 	for _, vcs := range config.VCSEnvironments {
-		s(vcs.Identifier, vcs.Type)
+		s(vcs.Identifier, vcs.Type+cli.Italic(fmt.Sprintf(" (configuration: '%s')", vcs.Configuration)))
 	}
 
 	return &cw

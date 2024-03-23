@@ -8,7 +8,6 @@ import (
 )
 
 func Add(ctx context.ProjectContext) error {
-	// TODO this needs to be fixed
 	c := ctx.Configuration()
 
 	options := make([]string, 0, len(c.VCSEnvironments))
