@@ -7,6 +7,8 @@ import (
 
 	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils"
+	"github.com/svenliebig/work-environment/pkg/utils/cli"
+	"github.com/svenliebig/work-environment/pkg/utils/configwriter"
 )
 
 var (
@@ -137,6 +139,49 @@ func (c *projectContext) Configuration() *core.Configuration {
 
 func (c *projectContext) ConfigurationPath() string {
 	return c.baseContext.ConfigurationPath()
+}
+
+func (c *projectContext) Info() *configwriter.ConfigWriter {
+	cw := c.baseContext.Info()
+
+	add, err := cw.AddSection("project")
+	if err != nil {
+		return nil
+	}
+
+	project := c.Project()
+	branch, err := project.GetBranchName()
+
+	if err != nil {
+		return nil
+	}
+
+	add("name", project.Identifier)
+	add("path", project.Path)
+	add("remote_url", project.Git.RemoteUrl)
+	add("branch", branch)
+
+	defaultBranch, err := project.GetDefaultBranchName()
+
+	if err != nil {
+		return nil
+	}
+
+	add("default_branch", defaultBranch)
+
+	if project.VCS != nil {
+		add("vcs", project.VCS.Id+cli.Italic(fmt.Sprintf(" (configuration: '%s')", project.VCS.Configuration)))
+	}
+
+	if project.CI != nil {
+		add("ci", project.CI.Id+cli.Italic(fmt.Sprintf(" (projectkey: '%s')", project.CI.ProjectKey)))
+	}
+
+	if project.CD != nil {
+		add("cd", project.CD.Id+cli.Italic(fmt.Sprintf(" (projectid: '%d')", project.CD.ProjectId)))
+	}
+
+	return cw
 }
 
 func (c *projectContext) Close() error {

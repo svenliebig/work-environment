@@ -17,9 +17,8 @@ import (
 var (
 	ciCmd = &cobra.Command{
 		Use:   "ci",
-		Short: "Configure and use continuous integrations",
-		Long: `Configure and use continuous integrations, add specficis CI's to your project or
-create a globally available work environment CI.`,
+		Short: "Configure and use continuous integrations environments",
+		Long:  `Configure and use continuous integrations environments, create CI environments and add them to your project.`,
 	}
 	createCmd = &cobra.Command{
 		Use:   "create",

@@ -1,7 +1,7 @@
 package core
 
 type CI struct {
-	CiType     string
+	Type       string
 	Identifier string
 	AuthToken  string
 	Url        string

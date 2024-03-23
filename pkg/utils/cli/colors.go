@@ -12,6 +12,11 @@ var Cyan = "\033[36m"
 var Gray = "\033[37m"
 var White = "\033[97m"
 
+// colorizes cli text.
+//
+// usage:
+//
+//	cli.Colorize(cli.Red, "this is red")
 func Colorize(c string, s string) string {
 	return fmt.Sprintf("%s%s%s", c, s, Reset)
 }

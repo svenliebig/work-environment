@@ -35,7 +35,7 @@ func Add(ctx context.ProjectContext, ciId string, projectId string, key string, 
 	}
 
 	if suggest {
-		client, err := UseClient(ctx, ci.CiType)
+		client, err := UseClient(ctx, ci.Type)
 
 		if err != nil {
 			return err

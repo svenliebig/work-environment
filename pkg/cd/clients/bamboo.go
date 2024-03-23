@@ -64,7 +64,7 @@ func (c *client) Info() (*cd.ClientInfo, error) {
 
 	return &cd.ClientInfo{
 		Identifier: c.ctx.Project().CD.Id,
-		Type:       c.ci.CiType,
+		Type:       c.ci.Type,
 		URL:        c.bambooClient.BaseUrl,
 		Version:    c.ci.Version,
 		ProjectId:  c.ctx.Project().CD.ProjectId,

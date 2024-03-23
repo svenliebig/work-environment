@@ -18,10 +18,8 @@ import (
 var (
 	vcsCmd = &cobra.Command{
 		Use:   "vcs",
-		Short: "Use this command to manage your version control system.",
-		Long: `Use this command to manage your vcs (version control system).
-
-	You can add new vcs, list all available vcs, remove a vcs or switch between vcs.`,
+		Short: "Configure and use version control system environments",
+		Long:  `Configure and use version control system environments, you can add new vcs, list all available vcs, remove a vcs or switch between vcs.`,
 	}
 	vcsCreate = &cobra.Command{
 		Use:   "create",

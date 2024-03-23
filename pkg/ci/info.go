@@ -60,7 +60,7 @@ func Info(ctx context.ProjectContext, options *InfoOptions) error {
 	fmt.Printf("\nConfigured CI for '%s':\n\n", cli.Colorize(cli.Purple, p.Identifier))
 	w := &tablewriter.TableWriter{}
 	fmt.Fprintf(w, "  %s: \t%s", "CI Identifier", ci.Identifier)
-	fmt.Fprintf(w, "  %s: \t%s", "CI Type", ci.CiType)
+	fmt.Fprintf(w, "  %s: \t%s", "CI Type", ci.Type)
 	fmt.Fprintf(w, "  %s: \t%s", "CI URL", ci.Url)
 	fmt.Fprintf(w, "  %s: \t%s", "CI Version", ci.Version)
 	fmt.Fprintf(w, "  %s: \t%s", "Project Key", p.CI.ProjectKey)

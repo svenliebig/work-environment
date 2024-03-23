@@ -47,7 +47,7 @@ func Create(ctx context.BaseContext, url string, ciType string, name string, aut
 	}
 
 	ci := &core.CI{
-		CiType:     ciType,
+		Type:       ciType,
 		Identifier: name,
 		AuthToken:  auth,
 		Url:        url,
@@ -74,7 +74,7 @@ func Create(ctx context.BaseContext, url string, ciType string, name string, aut
 
 	w := &tablewriter.TableWriter{}
 	fmt.Fprintf(w, "  Identifier: \t%s", ci.Identifier)
-	fmt.Fprintf(w, "  Type: \t%s", ci.CiType)
+	fmt.Fprintf(w, "  Type: \t%s", ci.Type)
 	fmt.Fprintf(w, "  URL: \t%s", ci.Url)
 	fmt.Fprintf(w, "  Version: \t%s", version.Version)
 	fmt.Fprintf(w, "  Token: \t%s", strings.Repeat("*", len(ci.AuthToken)))

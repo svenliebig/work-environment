@@ -23,7 +23,7 @@ func Add(ctx context.ProjectContext) error {
 		return err
 	}
 
-	client, err := ci.UseClient(ctx, ci_.CiType)
+	client, err := ci.UseClient(ctx, ci_.Type)
 
 	if err != nil {
 		return fmt.Errorf("%w: error while trying to get client", err)

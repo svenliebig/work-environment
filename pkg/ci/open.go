@@ -16,7 +16,7 @@ func Open(ctx context.ProjectContext) error {
 	}
 
 	if p.CI != nil {
-		client, err := UseClient(ctx, c.CiType)
+		client, err := UseClient(ctx, c.Type)
 
 		if err != nil {
 			return fmt.Errorf("error while trying to use client: %w", err)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils"
+	"github.com/svenliebig/work-environment/pkg/utils/configwriter"
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 type BaseContext interface {
 	Configuration() *core.Configuration
 	ConfigurationPath() string
+	Info() *configwriter.ConfigWriter
 	Close() error
 	GetProjectsInPath() []*core.Project
 }
@@ -97,6 +99,45 @@ func (c *baseContext) ConfigurationPath() string {
 	}
 
 	return c.configurationPath
+}
+
+func (c *baseContext) Info() *configwriter.ConfigWriter {
+	if !c.validated {
+		notValidated()
+	}
+
+	cw := configwriter.ConfigWriter{
+		Title: "work environment",
+	}
+
+	s, err := cw.AddSection("config")
+	config := c.Configuration()
+
+	if err != nil {
+		return nil
+	}
+
+	s("path", c.ConfigurationPath())
+
+	s, err = cw.AddSection("ci")
+
+	if err != nil {
+		return nil
+	}
+
+	for _, ci := range config.CIEnvironments {
+		s(ci.Identifier, ci.Type)
+	}
+
+	if s, err = cw.AddSection("vcs"); err != nil {
+		return nil
+	}
+
+	for _, vcs := range config.VCSEnvironments {
+		s(vcs.Identifier, vcs.Type)
+	}
+
+	return &cw
 }
 
 // writes the configuration if it's dirty

@@ -15,9 +15,8 @@ import (
 var (
 	cdCmd = &cobra.Command{
 		Use:   "cd",
-		Short: "Configure and use continuous integrations",
-		Long: `Configure and use continuous integrations, add specficis CI's to your project or
-create a globally available work environment CI.`,
+		Short: "Configure and use continuous delivery environments",
+		Long:  `Configure and use continuous delivery environments, create CD environments and add them to your project.`,
 	}
 	cdAddCmd = &cobra.Command{
 		Use:   "add",

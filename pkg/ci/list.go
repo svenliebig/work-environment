@@ -15,7 +15,7 @@ func List(ctx context.BaseContext) error {
 	fmt.Printf("\nAvailable CI Environments:\n\n")
 	fmt.Fprintf(w, "| %sID%s \t| Type \t| URL \t|", cli.Blue, cli.Reset)
 	for _, e := range config.CIEnvironments {
-		fmt.Fprintf(w, "| %s \t| %s \t| %s \t|", e.Identifier, e.CiType, e.Url)
+		fmt.Fprintf(w, "| %s \t| %s \t| %s \t|", e.Identifier, e.Type, e.Url)
 	}
 	w.Print()
 	fmt.Println()
