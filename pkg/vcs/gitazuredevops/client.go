@@ -3,8 +3,11 @@ package gitazuredevops
 import (
 	goctx "context"
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/svenliebig/work-environment/pkg/context"
+	"github.com/svenliebig/work-environment/pkg/utils/cli"
 	"github.com/svenliebig/work-environment/pkg/vcs"
 
 	"github.com/microsoft/azure-devops-go-api/azuredevops/v7"
@@ -54,27 +57,43 @@ func (c *client) WebURL() (string, error) {
 }
 
 func (c *client) Info() error {
-	fmt.Println("List")
-
 	client, err := c.gitClient()
 
 	if err != nil {
 		return err
 	}
 
-	var bla = "tp7"
+	config, err := c.configuration()
 
-	repositories, err := client.GetRepositories(goctx.Background(), git.GetRepositoriesArgs{
-		Project: &bla,
+	if err != nil {
+		return err
+	}
+
+	repoId, err := c.getRepositoryId()
+
+	if err != nil {
+		return err
+	}
+
+	repository, err := client.GetRepository(goctx.Background(), git.GetRepositoryArgs{
+		Project:      &config.Project,
+		RepositoryId: &repoId,
 	})
 
 	if err != nil {
 		return err
 	}
 
-	for _, repository := range *repositories {
-		fmt.Println(*repository.Name)
-	}
+	w := tabwriter.NewWriter(os.Stdout, 0, 1, 2, ' ', 0)
+	fmt.Fprintf(w, "  %s\t%s\n", cli.Bold("project"), *repository.Project.Name)
+	fmt.Fprintf(w, "  %s\t%s\n", cli.Bold("ssh_url"), *repository.SshUrl)
+	fmt.Fprintf(w, "  %s\t%s\n", cli.Bold("web_url"), *repository.WebUrl)
+	fmt.Fprintf(w, "  %s\t%s\n", cli.Bold("default_branch"), *repository.DefaultBranch)
+	fmt.Fprintf(w, "  %s\t%d\n", cli.Bold("size"), *repository.Size)
+
+	w.Flush()
+
+	fmt.Println()
 
 	return nil
 }
