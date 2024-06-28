@@ -16,7 +16,8 @@ import (
 )
 
 type client struct {
-	ctx         context.ProjectContext
+	ctx context.ProjectContext
+
 	_connection *azuredevops.Connection
 	_env        *envConfig
 	_coreClient azcore.Client
@@ -41,7 +42,9 @@ func (c *client) PullRequestWebURL() (string, error) {
 
 	defaultBranch, err := project.GetDefaultBranchName()
 
-	fmt.Println(defaultBranch)
+	if err != nil {
+		return "", err
+	}
 
 	return fmt.Sprintf("%s/pullrequestcreate?sourceRef=%s&targetRef=%s", config.WebURL, branch, defaultBranch), nil
 }
@@ -99,7 +102,7 @@ func (c *client) Info() error {
 }
 
 func init() {
-	vcs.RegisterClient(identifier, func(ctx context.ProjectContext) vcs.Client {
+	vcs.RegisterClient(identifier, func(ctx context.ProjectContext) vcs.ConfigurableClient {
 		return &client{
 			ctx: ctx,
 		}

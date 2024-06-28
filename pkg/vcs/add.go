@@ -22,25 +22,7 @@ func Add(ctx context.ProjectContext) error {
 		return err
 	}
 
-	err = ctx.UpdateVCS(vcse, "")
-
-	if err != nil {
-		return err
-	}
-
-	client, err := UseClient(ctx, vcse)
-
-	if err != nil {
-		return err
-	}
-
-	configuration, err := client.Configure()
-
-	if err != nil {
-		return err
-	}
-
-	err = ctx.UpdateVCS(vcse, configuration)
+	err = ConfigureClient(ctx, vcse)
 
 	if err != nil {
 		return err

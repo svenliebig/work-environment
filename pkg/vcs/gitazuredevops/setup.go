@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/svenliebig/work-environment/pkg/context"
+	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
 	"github.com/svenliebig/work-environment/pkg/vcs"
 )
@@ -40,19 +41,29 @@ func (c *client) environment() (*envConfig, error) {
 		return c._env, nil
 	}
 
-	config := &envConfig{}
-
 	vcse, err := c.ctx.GetVCS()
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err := json.Unmarshal([]byte(vcse.Configuration), config); err != nil {
+	config, err := environment(vcse)
+
+	if err != nil {
 		return nil, err
 	}
 
 	c._env = config
+
+	return config, nil
+}
+
+func environment(vcse *core.VCS) (*envConfig, error) {
+	config := &envConfig{}
+
+	if err := json.Unmarshal([]byte(vcse.Configuration), config); err != nil {
+		return nil, err
+	}
 
 	return config, nil
 }

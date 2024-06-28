@@ -26,10 +26,22 @@ type ProjectContext interface {
 	BaseContext
 
 	Project() *core.Project
+
+	// returns the CI for the project in the cwd.
+	//
+	// if no ci is set for the project a ErrProjectHasNoCI will be returned.
 	GetCI() (*core.CI, error)
+
+	// tell the context to use a ci with a specific id, overrides the default, to take
+	// the ci id from the project
 	UseCI(id string) error
 
+	// returns the VCS for the project in the cwd.
 	GetVCS() (*core.VCS, error)
+
+	// update the VCS for the project in the cwd.
+	//
+	// if nil is passed the VCS will be removed from the project.
 	UpdateVCS(vcs *core.VCS, configuration string) error
 }
 

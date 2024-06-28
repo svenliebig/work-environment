@@ -7,6 +7,8 @@ import (
 
 	azcore "github.com/microsoft/azure-devops-go-api/azuredevops/v7/core"
 	"github.com/microsoft/azure-devops-go-api/azuredevops/v7/git"
+	"github.com/svenliebig/work-environment/pkg/core"
+	"github.com/svenliebig/work-environment/pkg/utils/cli"
 	"github.com/svenliebig/work-environment/pkg/vcs"
 )
 
@@ -27,21 +29,44 @@ func (c *client) configuration() (*projectConfiguration, error) {
 	return &configuration, nil
 }
 
-func (c *client) Configure() (string, error) {
+func (c *client) Configure(vcse *core.VCS) (string, error) {
 	p := c.ctx.Project()
-	fmt.Printf("Configure '%s' for project '%s'...\n", p.VCS.Id, p.Identifier)
+	fmt.Printf("%s '%s' for project '%s'...\n",
+		cli.Colorize(cli.Blue, "Configure"),
+		cli.Colorize(cli.Purple, vcse.Identifier),
+		cli.Colorize(cli.Purple, p.Identifier),
+	)
 
-	coreClient, err := c.coreClient()
-	gitClient, err := c.gitClient()
+	env, err := environment(vcse)
 
 	if err != nil {
 		return "", err
 	}
 
+	c._env = env
+
+	coreClient, err := c.coreClient()
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create core client: %w", err)
+	}
+
+	gitClient, err := c.gitClient()
+
+	if err != nil {
+		return "", fmt.Errorf("failed to create git client: %w", err)
+	}
+
 	projects, err := coreClient.GetProjects(goctx.Background(), azcore.GetProjectsArgs{})
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to get projects: %w", err)
+	}
+
+	projectIdentifier, err := p.GetGitIdentifier()
+
+	if err != nil {
+		return "", fmt.Errorf("failed to get project identifier: %w", err)
 	}
 
 	for _, project := range projects.Value {
@@ -54,8 +79,7 @@ func (c *client) Configure() (string, error) {
 		}
 
 		for _, repository := range *repositories {
-			if *repository.Name == p.Identifier {
-				fmt.Println("Repository found.")
+			if *repository.Name == projectIdentifier {
 
 				result, err := json.Marshal(projectConfiguration{
 					Project: *project.Name,

@@ -23,11 +23,6 @@ var (
 )
 
 type Client interface {
-	// is called immediately after the client is attached to the project context
-	// and is used to configure the client with the necessary information, the
-	// returned value is saved on the property configuration of the context.
-	Configure() (string, error)
-
 	// prints information about the repository.
 	Info() error
 
@@ -38,7 +33,14 @@ type Client interface {
 	PullRequestWebURL() (string, error)
 }
 
-type ClientFactory func(ctx context.ProjectContext) Client
+type ConfigurableClient interface {
+	Client
+
+	// configures a vcs client for a project, based of the chosen vcs environment.
+	Configure(*core.VCS) (string, error)
+}
+
+type ClientFactory func(ctx context.ProjectContext) ConfigurableClient
 type Setup func(ctx context.BaseContext) (string, error)
 
 func SetupClient(ctx context.BaseContext, environment core.VCS) (core.VCS, error) {
@@ -93,6 +95,25 @@ func AvailableClients() []string {
 	}
 
 	return names
+}
+
+func ConfigureClient(ctx context.ProjectContext, vcse *core.VCS) error {
+	lock.RLock()
+	defer lock.RUnlock()
+
+	client, err := UseClient(ctx, vcse)
+
+	if err != nil {
+		return err
+	}
+
+	config, err := client.(ConfigurableClient).Configure(vcse)
+
+	if err != nil {
+		return err
+	}
+
+	return ctx.UpdateVCS(vcse, config)
 }
 
 func UseClient(ctx context.ProjectContext, vcse *core.VCS) (Client, error) {
