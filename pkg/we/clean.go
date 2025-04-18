@@ -1,15 +1,16 @@
 package we
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
-	"strings"
+	"sync"
 
 	"github.com/svenliebig/work-environment/pkg/context"
 	"github.com/svenliebig/work-environment/pkg/core"
 	"github.com/svenliebig/work-environment/pkg/utils/bytes"
+	"github.com/svenliebig/work-environment/pkg/utils/git"
 	"github.com/svenliebig/work-environment/pkg/utils/tablewriter"
 )
 
@@ -28,36 +29,74 @@ func Clean(ctx context.BaseContext, o *CleanOptions) error {
 	tw.Write([]byte("📁 Project   \t| 📦 Total Size \t| 🧹 Cleanable Size \t| 💾 Ratio"))
 	tw.Line()
 
+	type projectResult struct {
+		project       *core.Project
+		size          int64
+		cleanableSize int64
+		err           error
+	}
+
+	resultChan := make(chan projectResult)
+
+	// Launch goroutines for each project
 	for _, p := range projects {
-		size, err := getTotalSize(p)
-		if err != nil {
-			return err
+		go func(proj *core.Project) {
+			result := projectResult{project: proj}
+			
+			// Use waitgroup to synchronize the two goroutines
+			var wg sync.WaitGroup
+			wg.Add(2)
+			
+			// Get total size concurrently
+			go func() {
+				defer wg.Done()
+				size, err := getTotalSize(proj)
+				if err != nil {
+					result.err = err
+					return
+				}
+				result.size = size
+			}()
+			
+			// Get cleanable size concurrently
+			go func() {
+				defer wg.Done()
+				cleanSize, err := getCleanableSize(proj)
+				if err != nil {
+					result.err = err
+					return
+				}
+				result.cleanableSize = cleanSize
+			}()
+			
+			wg.Wait()
+			resultChan <- result
+		}(p)
+	}
+
+	formatOptions := &bytes.FormatOptions{
+		Colorize:  true,
+		Precision: 2,
+	}
+
+	// Collect and process results
+	for range projects {
+		result := <-resultChan
+		if result.err != nil {
+			return result.err
 		}
 
-		cleanableSize, err := getCleanableSize(p)
-		if err != nil {
-			return err
-		}
+		totalSize += result.size
+		totalCleanableSize += result.cleanableSize
 
-		totalSize += size
-		totalCleanableSize += cleanableSize
+		ratio := float64(result.cleanableSize) / float64(result.size)
 
-		ratio := float64(cleanableSize) / float64(size)
-
-		tw.Write([]byte(p.Identifier + " \t| " + bytes.Format(size, &bytes.FormatOptions{
-			Colorize: true,
-		}) + " \t| " + bytes.Format(cleanableSize, &bytes.FormatOptions{
-			Colorize: true,
-		}) + " \t| " + fmt.Sprintf("%.2f%%", ratio * 100)))
+		tw.Write([]byte(result.project.Identifier + " \t| " + bytes.Format(result.size, formatOptions) + " \t| " + bytes.Format(result.cleanableSize, formatOptions) + " \t| " + fmt.Sprintf("%.2f%%", ratio * 100)))
 		tw.Print()
 	}
 
 	tw.Line()
-	tw.Write([]byte("🔍 Total   \t| " + bytes.Format(totalSize, &bytes.FormatOptions{
-		Colorize: true,
-	}) + " \t| " + bytes.Format(totalCleanableSize, &bytes.FormatOptions{
-		Colorize: true,
-	}) + " \t| " + fmt.Sprintf("%.2f%%", float64(totalCleanableSize) / float64(totalSize) * 100)))
+	tw.Write([]byte("🔍 Total   \t| " + bytes.Format(totalSize, formatOptions) + " \t| " + bytes.Format(totalCleanableSize, formatOptions) + " \t| " + fmt.Sprintf("%.2f%%", float64(totalCleanableSize) / float64(totalSize) * 100)))
 	tw.Print()
 
 	return nil
@@ -98,18 +137,21 @@ func getTotalSizeOfPath(path string) (int64, error) {
 func getCleanableSize(p *core.Project) (int64, error) {
 	var cleanableSize int64 = 0
 
-	ignoredFilesOrDirectories, err := getIgnoredFilesOrDirectories(p)
+	ignoredDirectories, err := getIgnoredFilesOrDirectories(p)
+
+	// fmt.Println("ignoredDirectories", ignoredDirectories)
+
 	if err != nil {
 		return 0, err
 	}
 
-	for _, fileOrDirectory := range ignoredFilesOrDirectories {
-		_, err := os.Stat(filepath.Join(p.Path, fileOrDirectory))
+	for _, fileOrDirectory := range ignoredDirectories {
+		_, err := os.Stat(fileOrDirectory)
 		if os.IsNotExist(err) {
 			continue
 		}
 		
-		size, err := getTotalSizeOfPath(filepath.Join(p.Path, fileOrDirectory))
+		size, err := getTotalSizeOfPath(fileOrDirectory)
 		if err != nil {
 			return 0, err
 		}
@@ -140,27 +182,28 @@ const (
 func getIgnoredFilesOrDirectories(p *core.Project) ([]string, error) {
 	var ignoredFiles []string
 
-	gitignorePath := filepath.Join(p.Path, ".gitignore")
-
-	file, err := os.OpenFile(gitignorePath, os.O_RDONLY, 0644)
-	if os.IsNotExist(err) {
-		return []string{}, nil
-	} else if err != nil {
+	ignoredDirectories, err := git.FindAllIgnoredExistingDirectories(p.Path)
+	if err != nil {
 		return nil, err
 	}
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
+	for _, ignoredDirectory := range ignoredDirectories {
+		_, err := os.OpenFile(ignoredDirectory, os.O_RDONLY, 0644)
+		if os.IsNotExist(err) {
+			return []string{}, nil
+		} else if err != nil {
+			return nil, err
+		}
+
 		switch {
-		case matchFileOrDirectory(line, NodeModules):
-			fallthrough
-		case matchFileOrDirectory(line, Dist):
-			fallthrough
-		case matchFileOrDirectory(line, Target):
-			fallthrough
-		case matchFileOrDirectory(line, Build):
-			ignoredFiles = append(ignoredFiles, line)
+			case matchFileOrDirectory(ignoredDirectory, NodeModules):
+				fallthrough
+			case matchFileOrDirectory(ignoredDirectory, Dist):
+				fallthrough
+			case matchFileOrDirectory(ignoredDirectory, Target):
+				fallthrough
+			case matchFileOrDirectory(ignoredDirectory, Build):
+				ignoredFiles = append(ignoredFiles, ignoredDirectory)
 		}
 	}
 
@@ -168,5 +211,6 @@ func getIgnoredFilesOrDirectories(p *core.Project) ([]string, error) {
 }
 
 func matchFileOrDirectory(line string, folder string) bool {
-	return strings.HasPrefix(line, folder) || strings.HasPrefix(line, "/" + folder) || strings.HasPrefix(line, "./" + folder)
+	// fmt.Println("line", line, "folder", folder, "match", path.Base(line) == folder)
+	return path.Base(line) == folder
 }
