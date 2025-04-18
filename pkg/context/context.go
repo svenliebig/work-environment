@@ -9,6 +9,7 @@ import (
 	"github.com/svenliebig/work-environment/pkg/utils"
 	"github.com/svenliebig/work-environment/pkg/utils/cli"
 	"github.com/svenliebig/work-environment/pkg/utils/configwriter"
+	logging "github.com/svenliebig/work-environment/pkg/utils/log"
 )
 
 var (
@@ -59,7 +60,12 @@ type projectContext struct {
 // create a ProjectContext out of the cwd and validates
 // if a project and a configuration can be found.
 func CreateProjectContext() (*projectContext, error) {
+	logging.Trace("content.CreateProjectContext()")
+
 	p, err := utils.GetPath([]string{})
+
+	logging.Debugf("content.CreateProjectContext() - path: %s", p)
+
 	c := &projectContext{
 		Cwd: p,
 	}

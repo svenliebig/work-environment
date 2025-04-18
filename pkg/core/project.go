@@ -36,6 +36,10 @@ func (p *Project) GetBranchName() (string, error) {
 	return git.BranchName(p.Path)
 }
 
+func (p *Project) GetGitIdentifier() (string, error) {
+	return git.GetIdentifier(p.Path)
+}
+
 // uses the path of the project and the git package
 func (p *Project) GetDefaultBranchName() (string, error) {
 	return git.DefaultBranchName(p.Path)

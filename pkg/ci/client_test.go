@@ -10,8 +10,16 @@ import (
 type clientImpl struct {
 }
 
+func (c clientImpl) GetPlanUrl() (string, error) {
+	return "", nil
+}
+
 func (c clientImpl) GetBranchPlans() ([]*BranchPlan, error) {
 	return make([]*BranchPlan, 0), nil
+}
+
+func (c clientImpl) GetBranchPlanUrl() (string, error) {
+	return "", nil
 }
 
 func (c clientImpl) GetPlanSuggestion() (string, error) {

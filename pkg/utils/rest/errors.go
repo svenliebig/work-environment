@@ -16,7 +16,7 @@ type RestGetError struct {
 }
 
 func (err *RestGetError) Error() string {
-	return fmt.Sprintf("Error while trying to perform a rest.Get request to '%s'.", err.url)
+	return fmt.Sprintf("error while trying to perform a rest.Get request to '%s'.", err.url)
 }
 
 type RestGetRequestCreationError struct {
@@ -24,5 +24,5 @@ type RestGetRequestCreationError struct {
 }
 
 func (err *RestGetRequestCreationError) Error() string {
-	return fmt.Sprintf("Error while trying to create a rest.Get request with the url '%s'.", err.url)
+	return fmt.Sprintf("error while trying to create a rest.Get request with the url '%s'.", err.url)
 }

@@ -17,7 +17,7 @@ type infoResult struct {
 func (c *Client) GetInfo(ctx context.Context) (*infoResult, error) {
 	url := fmt.Sprintf("%s/rest/api/latest/info", c.BaseUrl)
 	headers := make(map[string]string)
-	headers["Authorization"] = fmt.Sprintf("Basic %s", c.AuthToken)
+	headers["Authorization"] = fmt.Sprintf("Bearer %s", c.AuthToken)
 	headers["Accept"] = "application/json"
 
 	res, err := rest.Get(ctx, url, &rest.Options{
