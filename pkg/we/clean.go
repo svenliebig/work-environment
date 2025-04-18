@@ -26,6 +26,8 @@ func Clean(ctx context.BaseContext, o *CleanOptions) error {
 	totalCleanableSize := int64(0)
 
 	tw.Write([]byte("📁 Project   \t| 📦 Total Size \t| 🧹 Cleanable Size \t| 💾 Ratio"))
+	tw.Line()
+
 	for _, p := range projects {
 		size, err := getTotalSize(p)
 		if err != nil {
