@@ -11,6 +11,7 @@ var Purple = "\033[35m"
 var Cyan = "\033[36m"
 var Gray = "\033[37m"
 var White = "\033[97m"
+var Orange = "\033[38;5;208m"
 
 // colorizes cli text.
 //
